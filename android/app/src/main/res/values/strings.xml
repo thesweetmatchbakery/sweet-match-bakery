@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Sweet Match Bakery</string>
+    <string name="title_activity_main">Sweet Match Bakery</string>
+    <string name="package_name">com.sweetmatchbakery.app</string>
+    <string name="custom_url_scheme">com.sweetmatchbakery.app</string>
+</resources>
