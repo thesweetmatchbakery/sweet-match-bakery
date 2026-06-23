@@ -1,0 +1,55 @@
+name: Build Android AAB
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Sync Capacitor
+        run: npx cap sync android
+      
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses || true
+      
+      - name: Make Gradle wrapper executable
+        run: chmod +x android/gradlew
+      
+      - name: Build signed release AAB
+        working-directory: android
+        env:
+          KEYSTORE_PASSWORD: SweetMatch2026
+          KEY_ALIAS: sweetmatchbakery
+          KEY_PASSWORD: SweetMatch2026
+        run: ./gradlew bundleRelease
+      
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sweet-match-bakery-release
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
