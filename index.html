@@ -1,0 +1,3599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sweet Match Bakery</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;800;900&family=Nunito:wght@600;700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* === CANDY-SHOP BAKERY PALETTE — saturated and warm === */
+    /* Background warmth — brighter, sweeter */
+    --paper: #fff5dc;
+    --paper-warm: #ffe4b3;
+    --paper-dusk: #ffc88e;
+
+    /* Bakery character tones */
+    --cream: #fff7e0;
+    --butter: #ffd24a;
+    --butter-deep: #f5a020;
+    --caramel: #d8722a;
+    --caramel-dark: #7a3a0c;
+    --choco: #2e1810;
+    --choco-soft: #5a3220;
+
+    /* Vibrant accent set — HOT and saturated for tiles + UI */
+    --rose: #ff4d7d;           /* strawberry — hot pink */
+    --rose-light: #ffa8c0;
+    --rose-deep: #c61852;
+    --indigo: #5874e8;         /* blueberry — saturated blue */
+    --indigo-light: #95a8f0;
+    --indigo-deep: #2a3a9c;
+    --lemon: #ffc418;          /* lemon — punchy yellow */
+    --lemon-light: #ffe070;
+    --lemon-deep: #c08800;
+    --sage: #5fcf85;           /* mint — vivid green */
+    --sage-light: #a8e8bc;
+    --sage-deep: #2a8a4a;
+    --plum: #c656f0;           /* grape — vibrant purple */
+    --plum-light: #e0a8f5;
+    --plum-deep: #6a2a8a;
+    --cocoa: #a85a2a;          /* choco — rich caramel-brown */
+    --cocoa-light: #d99060;
+    --cocoa-deep: #4a2208;
+
+    /* UI shades */
+    --shadow: rgba(94, 50, 32, 0.24);
+    --shadow-deep: rgba(94, 50, 32, 0.42);
+    --paper-edge: rgba(122, 63, 18, 0.15);
+
+    /* Special */
+    --gold: #ffc418;
+    --gold-deep: #c08800;
+
+    /* Compatibility alias for any leftover --berry references */
+    --berry: #ff4d7d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Nunito', sans-serif;
+    color: var(--choco);
+    touch-action: manipulation;
+    background: var(--paper);
+  }
+
+  /* === SEAMLESS RESPONSIVE LAYOUT ===
+     Fills the screen on every device. No narrow column. No cramping.
+     Phone, tablet, desktop, Chromebook — one layout, scales everywhere. */
+
+  #app-wrapper {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(255, 220, 220, 0.95), transparent 50%),
+      radial-gradient(ellipse 70% 50% at 85% 30%, rgba(255, 200, 230, 0.8), transparent 55%),
+      radial-gradient(ellipse 90% 70% at 50% 95%, rgba(255, 210, 180, 0.85), transparent 60%),
+      linear-gradient(180deg, #fff0e0 0%, #ffdcc0 40%, #ffc8a8 100%);
+  }
+
+  #app {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 700px;
+    z-index: 1;
+    overflow: hidden;
+  }
+  /* Paper grain texture overlay */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    background-image:
+      radial-gradient(circle at 13% 27%, rgba(180, 110, 60, 0.06) 0.5px, transparent 1.5px),
+      radial-gradient(circle at 47% 65%, rgba(180, 110, 60, 0.08) 0.5px, transparent 1.5px),
+      radial-gradient(circle at 72% 18%, rgba(180, 110, 60, 0.06) 0.5px, transparent 1.5px),
+      radial-gradient(circle at 88% 78%, rgba(180, 110, 60, 0.07) 0.5px, transparent 1.5px),
+      radial-gradient(circle at 32% 88%, rgba(180, 110, 60, 0.05) 0.5px, transparent 1.5px);
+    background-size: 80px 80px, 120px 120px, 100px 100px, 140px 140px, 90px 90px;
+  }
+  .screen {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: clamp(12px, 2.5vh, 24px) clamp(12px, 3vw, 24px) clamp(20px, 4vh, 60px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    justify-content: flex-start;
+  }
+  .screen.active { display: flex; }
+
+  .btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: clamp(14px, 2.2vh, 18px);
+    padding: clamp(8px, 1.5vh, 14px) clamp(16px, 4vw, 32px);
+    border: none;
+    border-radius: clamp(14px, 2.5vh, 22px);
+    background: linear-gradient(180deg, var(--rose) 0%, var(--rose-deep) 100%);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--rose-deep), 0 6px 16px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.45);
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.18);
+    letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 4px; left: 12%; right: 12%;
+    height: 30%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.4), transparent);
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(2px);
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--rose-deep), 0 3px 8px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.4); }
+  .btn-secondary {
+    background: linear-gradient(180deg, #fff, var(--paper-warm));
+    color: var(--caramel-dark);
+    box-shadow: 0 4px 0 var(--butter-deep), 0 6px 14px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  .btn-secondary:active { box-shadow: 0 1px 0 var(--butter-deep), 0 3px 8px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.7); }
+  .btn-small { padding: clamp(5px, 1vh, 9px) clamp(10px, 2.5vw, 20px); font-size: clamp(11px, 1.8vh, 14px); border-radius: clamp(10px, 2vh, 16px); }
+
+  /* === HOME SCREEN === */
+  .home-logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(32px, 6vh, 52px);
+    text-align: center;
+    line-height: 0.95;
+    margin-top: clamp(4px, 1vh, 12px);
+    color: var(--rose-deep);
+    text-shadow:
+      0 2px 0 #fff,
+      0 4px 0 var(--butter),
+      0 6px 0 var(--butter-deep),
+      0 8px 0 var(--caramel),
+      0 12px 24px rgba(122, 63, 18, 0.3);
+    letter-spacing: -1px;
+    transform: rotate(-2deg);
+    position: relative;
+  }
+  .home-logo::after {
+    content: '✦';
+    position: absolute;
+    top: -5px;
+    right: 8%;
+    font-size: 22px;
+    color: var(--gold);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    animation: twinkle 2s infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.4; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+  .home-sub {
+    font-family: 'Caveat', cursive;
+    font-size: clamp(14px, 2.5vh, 20px);
+    color: var(--rose-deep);
+    margin-top: 4px;
+    margin-bottom: clamp(4px, 1vh, 10px);
+    transform: rotate(-1deg);
+    opacity: 0.8;
+  }
+  .home-button-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(6px, 1.2vh, 14px);
+    width: 100%;
+    max-width: 280px;
+    margin-bottom: clamp(10px, 2vh, 30px);
+  }
+  .home-button-stack .btn { width: 100%; }
+  .home-legal-links {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--caramel-dark);
+    opacity: 0.75;
+    margin-top: 6px;
+  }
+  .home-legal-links a {
+    color: var(--caramel-dark);
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .bakery-display {
+    background: linear-gradient(180deg, #fff 0%, var(--paper-warm) 100%);
+    border: 3px solid var(--butter-deep);
+    border-radius: 28px;
+    border-radius: 24px;
+    padding: 18px;
+    width: 90%;
+    max-width: 360px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 0 var(--shadow);
+  }
+  .bakery-title { font-family: 'Fraunces', serif; font-size: 20px; text-align: center; color: var(--caramel-dark); margin-bottom: 12px; }
+  .bakery-subtitle { font-size: 11px; text-align: center; color: var(--caramel); margin-bottom: 10px; font-weight: 700; }
+  .bakery-shelf { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin-bottom: 12px; }
+  .shelf-item {
+    aspect-ratio: 1;
+    background: var(--cream);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);
+    opacity: 0.25;
+    filter: grayscale(80%);
+    transition: all 0.4s;
+  }
+  .shelf-item.unlocked { opacity: 1; filter: none; background: linear-gradient(180deg, #fff8e8, #ffe8c4); animation: unlock 0.5s; }
+  @keyframes unlock { 0% { transform: scale(0.5); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+  .progress-bar { height: 10px; background: var(--cream); border-radius: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.15); }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #ff6b8a, var(--berry)); transition: width 0.5s; }
+  .progress-text { text-align: center; font-size: 12px; color: var(--caramel-dark); margin-top: 6px; font-weight: 700; }
+
+  .map-header { width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .map-title { font-family: 'Fraunces', serif; font-size: 22px; color: var(--caramel-dark); }
+  .level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 100%; max-width: 360px; padding-bottom: 40px; }
+  .level-node {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 17px;
+    cursor: pointer;
+    transition: transform 0.15s;
+    position: relative;
+  }
+  .level-node.locked {
+    background: linear-gradient(180deg, #e0c8a8, #b89c80);
+    color: #6e5840;
+    box-shadow: 0 3px 0 #8a7058, 0 5px 8px var(--shadow);
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  .level-node.unlocked {
+    background: linear-gradient(180deg, var(--lemon-light) 0%, var(--lemon) 50%, var(--lemon-deep) 100%);
+    color: var(--caramel-dark);
+    box-shadow: 0 4px 0 var(--lemon-deep), 0 6px 12px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.6);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    animation: nodeBreathe 2s ease-in-out infinite;
+  }
+  @keyframes nodeBreathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  .level-node.completed {
+    background: linear-gradient(180deg, var(--sage-light) 0%, var(--sage) 50%, var(--sage-deep) 100%);
+    color: white;
+    box-shadow: 0 4px 0 var(--sage-deep), 0 6px 10px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.5);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  }
+  .level-node.unlocked:active, .level-node.completed:active { transform: translateY(2px) scale(1); animation: none; }
+  .stars { position: absolute; bottom: -7px; left: 50%; transform: translateX(-50%); font-size: 10px; letter-spacing: -2px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3)); }
+
+  /* === GAME SCREEN CHROME === */
+  .game-top {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: clamp(8px, 2vh, 14px) clamp(12px, 3vw, 20px);
+    background: linear-gradient(180deg, #fff 0%, var(--paper-warm) 100%);
+    border-radius: clamp(16px, 3vh, 24px);
+    box-shadow: 0 3px 0 var(--butter-deep), 0 6px 12px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.7);
+    border: 2px solid var(--butter-deep);
+    margin-bottom: clamp(6px, 1.5vh, 12px);
+  }
+  .stat-box { text-align: center; padding: clamp(4px, 1vh, 8px) clamp(8px, 2vw, 14px); }
+  .stat-label { font-size: clamp(9px, 1.5vh, 12px); color: var(--rose-deep); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-value { font-family: 'Fraunces', serif; font-weight: 900; font-size: clamp(18px, 3.5vh, 28px); color: var(--caramel-dark); line-height: 1; }
+  .objective-banner {
+    width: 100%;
+    background: linear-gradient(180deg, var(--rose-light) 0%, var(--rose) 100%);
+    border: 2px solid var(--rose-deep);
+    border-radius: clamp(10px, 2vh, 16px);
+    padding: clamp(5px, 1vh, 10px) clamp(8px, 2vw, 16px);
+    margin-bottom: clamp(4px, 1vh, 10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: clamp(11px, 1.8vh, 15px);
+    color: white;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.18);
+    box-shadow: 0 3px 0 var(--rose-deep), 0 5px 10px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.4);
+    text-align: center;
+  }
+  .obj-icon { font-size: clamp(16px, 2.5vh, 22px); filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
+  .obj-mini-tile {
+    display: inline-block;
+    width: clamp(18px, 3vh, 26px); height: clamp(18px, 3vh, 26px);
+    vertical-align: middle;
+    margin: 0 2px 0 0;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
+  }
+  .obj-mini-tile svg { width: 100%; height: 100%; display: block; }
+  .board-container {
+    background:
+      linear-gradient(180deg, #ffb8d8 0%, #ee6aa8 100%);
+    padding: clamp(4px, 1vh, 8px);
+    border-radius: clamp(12px, 2.5vh, 22px);
+    box-shadow:
+      0 6px 0 #b03a78,
+      0 10px 28px rgba(176, 58, 120, 0.35),
+      inset 0 2px 0 rgba(255,255,255,0.5),
+      inset 0 -3px 6px rgba(176, 58, 120, 0.3);
+    position: relative;
+  }
+  .board-container::before {
+    content: '';
+    position: absolute;
+    top: 4px; left: 4px; right: 4px; bottom: 4px;
+    border: 2px dashed rgba(255,255,255,0.5);
+    border-radius: clamp(8px, 2vh, 18px);
+    pointer-events: none;
+  }
+  .board {
+    background: linear-gradient(180deg, #c84884 0%, #9c2864 100%);
+    border-radius: clamp(8px, 2vh, 14px);
+    padding: clamp(2px, 0.4vh, 3px);
+    position: relative;
+    display: grid;
+    box-shadow: inset 0 2px 8px rgba(80, 20, 50, 0.4);
+  }
+  .cell {
+    position: relative;
+    background: rgba(255, 200, 220, 0.15);
+    border-radius: 50%;
+    margin: 2px;
+  }
+  /* Jelly — pumped up, much more visible */
+  .cell.jelly::before {
+    content: '';
+    position: absolute; inset: 1px;
+    background: radial-gradient(circle at 35% 30%, rgba(180, 240, 255, 1), rgba(60, 180, 255, 0.95));
+    border-radius: 50%;
+    box-shadow:
+      inset 0 -3px 6px rgba(20, 100, 180, 0.5),
+      inset 0 2px 6px rgba(255,255,255,0.9),
+      0 0 0 2px rgba(255,255,255,0.5),
+      0 0 8px rgba(80, 200, 255, 0.6);
+  }
+  .cell.jelly-2::before {
+    background: radial-gradient(circle at 35% 30%, rgba(140, 200, 255, 1), rgba(20, 90, 220, 1));
+    box-shadow:
+      inset 0 -3px 6px rgba(10, 40, 120, 0.7),
+      inset 0 2px 6px rgba(255,255,255,0.7),
+      0 0 0 3px rgba(255,255,255,0.7),
+      0 0 10px rgba(40, 120, 240, 0.7);
+  }
+  /* === TILES (SVG-based, soft painterly) === */
+  .tile {
+    position: absolute;
+    inset: 2px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25));
+  }
+  .tile svg { width: 100%; height: 100%; }
+  .tile.selected {
+    transform: scale(1.18);
+    filter: drop-shadow(0 0 8px var(--gold)) drop-shadow(0 0 3px #fff) drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    z-index: 10;
+  }
+  .tile.matching { animation: pop 0.3s ease-out forwards; }
+  .tile.color-bomb { animation: shimmer 1.2s infinite; filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 4px var(--rose)) drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
+  @keyframes pop {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.35) rotate(8deg); }
+    60% { transform: scale(1.1) rotate(-4deg); }
+    100% { transform: scale(0) rotate(20deg); opacity: 0; }
+  }
+  @keyframes shimmer {
+    0%, 100% { filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 4px var(--rose)) drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
+    50% { filter: drop-shadow(0 0 12px #fff) drop-shadow(0 0 8px var(--lemon)) drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
+  }
+
+  /* Old color classes kept as no-op for compatibility */
+  .t-strawberry, .t-blueberry, .t-lemon, .t-mint, .t-grape, .t-choco { background: transparent; }
+
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(60, 30, 10, 0.65); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .modal-backdrop.active { display: flex; }
+  .modal {
+    background: linear-gradient(180deg, #fff 0%, var(--paper-warm) 100%);
+    border-radius: clamp(16px, 3vh, 28px);
+    padding: clamp(16px, 3vh, 28px) clamp(14px, 3vw, 24px);
+    width: 100%; max-width: min(340px, 90vw);
+    text-align: center;
+    box-shadow:
+      0 8px 0 var(--butter-deep),
+      0 14px 36px rgba(0,0,0,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.8);
+    border: 3px solid var(--butter-deep);
+    animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+  }
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 6px; left: 6px; right: 6px; bottom: 6px;
+    border: 2px dashed rgba(196, 122, 58, 0.25);
+    border-radius: 22px;
+    pointer-events: none;
+  }
+  @keyframes modalIn { from { transform: scale(0.5) rotate(-5deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+  .modal-title { font-family: 'Fraunces', serif; font-weight: 900; font-size: clamp(20px, 4vh, 30px); color: var(--rose-deep); margin-bottom: 6px; letter-spacing: -0.5px; }
+  .modal-sub { font-size: clamp(12px, 2vh, 15px); color: var(--caramel-dark); margin-bottom: clamp(6px, 1.5vh, 12px); font-weight: 700; }
+  .modal-stars { font-size: clamp(24px, 5vh, 36px); letter-spacing: 6px; margin: clamp(6px, 1.5vh, 12px) 0; filter: drop-shadow(0 2px 4px rgba(196, 138, 0, 0.4)); }
+  .modal-actions { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+
+  .back-btn {
+    background: linear-gradient(180deg, #fff, var(--paper-warm));
+    color: var(--caramel-dark);
+    border: 2px solid var(--butter-deep);
+    border-radius: 16px;
+    padding: 8px 16px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--butter-deep), 0 5px 8px var(--shadow);
+    font-size: 13px;
+  }
+  .back-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--butter-deep); }
+
+  @keyframes scorePop {
+    0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+    30% { transform: translate(-50%, -16px) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -50px) scale(1); opacity: 0; }
+  }
+  .float-score { position: absolute; font-family: 'Fraunces', serif; font-weight: 900; font-size: 18px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5), 0 0 6px var(--berry); pointer-events: none; animation: scorePop 0.8s ease-out forwards; z-index: 20; }
+
+  /* === CONFETTI === */
+  .confetti-layer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 150;
+    overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute;
+    top: -10%;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    85% { opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* How to Play */
+  .howto-content { width: 100%; max-width: 600px; padding-bottom: 40px; }
+  .howto-section { display: flex; gap: 14px; align-items: flex-start; background: linear-gradient(180deg, #fff, #fff4e0); border: 2px solid var(--butter); border-radius: 16px; padding: 14px; margin-bottom: 12px; box-shadow: 0 3px 0 var(--shadow); }
+  .howto-icon { font-size: 32px; flex-shrink: 0; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--cream); border-radius: 12px; }
+  .howto-text { font-size: 14px; line-height: 1.5; color: var(--choco); }
+  .howto-text b { color: var(--caramel-dark); }
+
+  /* Booster bar */
+  .booster-bar { display: flex; gap: clamp(4px, 1vw, 10px); justify-content: center; margin-top: clamp(4px, 1vh, 12px); width: 100%; }
+  .booster-btn {
+    flex: 1;
+    background: linear-gradient(180deg, #fff, #fff4e0);
+    border: 2px solid var(--caramel);
+    border-radius: 16px;
+    padding: 8px 4px 6px;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 3px 0 var(--caramel), 0 5px 8px var(--shadow);
+    transition: transform 0.1s, box-shadow 0.1s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .booster-btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--caramel); }
+  .booster-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .booster-btn.active-booster { background: linear-gradient(180deg, #ffe177, #ffb800); border-color: var(--berry); box-shadow: 0 0 0 3px var(--berry), 0 3px 0 var(--caramel); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 3px var(--berry), 0 3px 0 var(--caramel); } 50% { box-shadow: 0 0 0 5px var(--berry), 0 3px 0 var(--caramel); } }
+  .booster-icon { font-size: 26px; line-height: 1; }
+  .booster-label { font-size: 11px; font-weight: 800; color: var(--caramel-dark); margin-top: 2px; }
+  .booster-count { position: absolute; top: -6px; right: -6px; background: var(--berry); color: white; font-size: 11px; font-weight: 800; min-width: 20px; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3); border: 2px solid white; padding: 0 4px; }
+  .booster-count.zero { background: #888; }
+  .booster-hint { width: 100%; max-width: 600px; background: var(--berry); color: white; padding: 8px 12px; border-radius: 12px; text-align: center; font-weight: 700; font-size: 14px; margin-top: 8px; box-shadow: 0 3px 0 #a52545; animation: hintPop 0.3s; }
+  @keyframes hintPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* Continue / Ad modal */
+  .continue-options { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+  .continue-opt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, #fff8e8, #ffe8c4);
+    border: 2px solid var(--butter);
+    border-radius: 14px;
+    padding: 10px 14px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--caramel);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    color: var(--caramel-dark);
+    width: 100%;
+  }
+  .continue-opt:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--caramel); }
+  .continue-opt-left { display: flex; align-items: center; gap: 10px; font-size: 15px; }
+  .continue-opt-icon { font-size: 22px; }
+  .continue-opt-cost { font-size: 13px; background: rgba(0,0,0,0.1); padding: 3px 10px; border-radius: 8px; }
+
+  /* Fake ad screen */
+
+
+  /* === COVER / SPLASH SCREEN === */
+  .cover-content {
+    width: 100%; max-width: 600px;
+    display: flex; flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    padding: clamp(10px, 2vh, 20px);
+    text-align: center;
+  }
+  .cover-illustration {
+    width: min(280px, 70vw, 35vh);
+    aspect-ratio: 1;
+    margin-bottom: clamp(8px, 2vh, 20px);
+    filter: drop-shadow(0 8px 20px rgba(122, 63, 18, 0.3));
+    animation: gentleFloat 3.5s ease-in-out infinite;
+  }
+  @keyframes gentleFloat {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-12px) rotate(1deg); }
+  }
+  .cover-logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(32px, 7vh, 56px);
+    line-height: 0.92;
+    color: var(--rose-deep);
+    text-shadow:
+      0 2px 0 #fff,
+      0 4px 0 var(--butter),
+      0 6px 0 var(--butter-deep),
+      0 9px 0 var(--caramel),
+      0 13px 28px rgba(122, 63, 18, 0.35);
+    letter-spacing: -1.5px;
+    transform: rotate(-2deg);
+    margin-bottom: 6px;
+  }
+  .cover-tagline {
+    font-family: 'Caveat', cursive;
+    font-size: clamp(16px, 3.5vh, 26px);
+    color: var(--rose-deep);
+    margin-top: 8px;
+    margin-bottom: clamp(12px, 3vh, 36px);
+    opacity: 0.85;
+    transform: rotate(-1deg);
+  }
+  .cover-tap-prompt {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: clamp(12px, 2.2vh, 18px);
+    color: var(--caramel-dark);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: pulseFade 1.8s ease-in-out infinite;
+    margin-bottom: 20px;
+  }
+  @keyframes pulseFade {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+  }
+  .cover-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    display: flex;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--caramel-dark);
+    opacity: 0.75;
+  }
+  .cover-footer a {
+    color: var(--caramel-dark);
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  /* === LEGAL PAGES (terms + privacy) === */
+  .legal-content {
+    width: 100%; max-width: 600px;
+    padding: 0 20px 40px;
+  }
+  .legal-content h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--rose-deep);
+    margin-top: 24px;
+    margin-bottom: 8px;
+  }
+  .legal-content h3 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--caramel-dark);
+    margin-top: 16px;
+    margin-bottom: 6px;
+  }
+  .legal-content p, .legal-content li {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--choco-soft);
+    margin-bottom: 8px;
+  }
+  .legal-content ul { padding-left: 22px; margin-bottom: 10px; }
+  .legal-content .updated {
+    font-size: 12px;
+    color: var(--caramel);
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+  .legal-content .panel {
+    background: linear-gradient(180deg, #fff 0%, var(--paper-warm) 100%);
+    border: 2px solid var(--butter-deep);
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow: 0 3px 0 var(--butter-deep), 0 5px 12px var(--shadow);
+    margin-bottom: 14px;
+  }
+
+  /* === SHOP SCREEN === */
+  .shop-coin-display {
+    background: linear-gradient(180deg, #ffe177, #ffb800);
+    color: #6b4500;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 16px;
+    box-shadow: 0 3px 0 var(--gold-deep), inset 0 1px 0 rgba(255,255,255,0.6);
+    font-size: 14px;
+    min-width: 60px;
+    text-align: center;
+  }
+  .shop-content {
+    width: 100%; max-width: 600px;
+    display: flex; flex-direction: column;
+    gap: 12px;
+    padding-bottom: 10px;
+  }
+  .shop-section-label {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    color: var(--rose-deep);
+    margin-top: 8px;
+    margin-bottom: -2px;
+    padding-left: 4px;
+  }
+  .shop-item {
+    display: flex; align-items: center; gap: 14px;
+    background: linear-gradient(180deg, #fff 0%, var(--paper-warm) 100%);
+    border: 3px solid var(--butter-deep);
+    border-radius: 20px;
+    padding: 14px 16px;
+    box-shadow: 0 4px 0 var(--butter-deep), 0 6px 14px var(--shadow);
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .shop-item:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--butter-deep), 0 4px 8px var(--shadow); }
+  .shop-item.owned { opacity: 0.6; cursor: default; }
+  .shop-item.owned:active { transform: none; }
+  .shop-item.featured { border-color: var(--rose); box-shadow: 0 4px 0 var(--rose-deep), 0 6px 16px var(--shadow); }
+  .shop-item-icon { width: 56px; height: 56px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .shop-item-icon svg { width: 100%; height: 100%; }
+  .shop-item-info { flex: 1; min-width: 0; }
+  .shop-item-title { font-family: 'Fraunces', serif; font-weight: 900; font-size: 17px; color: var(--caramel-dark); }
+  .shop-item-detail { font-size: 12px; color: var(--caramel); font-weight: 700; margin-top: 1px; }
+  .shop-item-desc { font-size: 11px; color: var(--choco-soft); margin-top: 3px; line-height: 1.3; }
+  .shop-item-price {
+    background: linear-gradient(180deg, var(--sage) 0%, var(--sage-deep) 100%);
+    color: white; font-weight: 800; font-size: 15px;
+    padding: 9px 16px; border-radius: 14px;
+    box-shadow: 0 3px 0 var(--sage-deep), inset 0 1px 0 rgba(255,255,255,0.4);
+    text-shadow: 0 1px 0 rgba(0,0,0,0.2);
+    flex-shrink: 0; white-space: nowrap;
+  }
+  .shop-item.owned .shop-item-price { background: linear-gradient(180deg, #bbb, #999); box-shadow: 0 3px 0 #888; }
+  .shop-badge {
+    position: absolute; top: -10px; right: 12px;
+    background: linear-gradient(180deg, var(--rose) 0%, var(--rose-deep) 100%);
+    color: white; font-size: 9px; font-weight: 800; letter-spacing: 0.5px;
+    padding: 3px 10px; border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    border: 2px solid #fff;
+  }
+  .shop-badge.value { background: linear-gradient(180deg, var(--sage) 0%, var(--sage-deep) 100%); }
+  .shop-badge.limited { background: linear-gradient(180deg, var(--plum) 0%, var(--plum-deep) 100%); }
+  .shop-restore-btn {
+    margin-top: 14px; background: none; border: none;
+    color: var(--caramel-dark); text-decoration: underline;
+    font-weight: 700; font-size: 13px; cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  /* === FAKE PURCHASE SHEET === */
+  .purchase-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(3px);
+    display: none; align-items: flex-end; justify-content: center;
+    z-index: 250;
+  }
+  .purchase-backdrop.active { display: flex; }
+  .purchase-card {
+    background: #fff; width: 100%; max-width: 600px;
+    border-radius: 20px 20px 0 0;
+    overflow: hidden;
+    animation: sheetUp 0.3s ease-out;
+    font-family: 'Nunito', sans-serif;
+  }
+  @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .purchase-gplay-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 18px;
+    border-bottom: 1px solid #eee;
+    font-weight: 700; color: #5f6368; font-size: 15px;
+  }
+  .purchase-gplay-icon { color: #00875f; font-size: 18px; }
+  .purchase-body { padding: 18px; }
+  .purchase-item-row { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; }
+  .purchase-item-icon {
+    width: 44px; height: 44px;
+    background: var(--paper-warm);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; flex-shrink: 0;
+  }
+  .purchase-item-info { flex: 1; }
+  .purchase-item-title { font-weight: 700; font-size: 15px; color: #202124; }
+  .purchase-item-sub { font-size: 12px; color: #5f6368; }
+  .purchase-item-price { font-weight: 700; font-size: 16px; color: #202124; }
+  .purchase-payment-row {
+    display: flex; justify-content: space-between;
+    padding: 12px 0;
+    border-top: 1px solid #eee; border-bottom: 1px solid #eee;
+    font-size: 14px; color: #3c4043; font-weight: 600;
+  }
+  .purchase-prototype-note {
+    font-size: 11px; color: #b06a00;
+    background: #fff8e0; border-radius: 8px;
+    padding: 8px 10px; margin: 12px 0; line-height: 1.4;
+  }
+  .purchase-buy-btn {
+    width: 100%; background: #00875f; color: white;
+    border: none; border-radius: 24px; padding: 13px;
+    font-weight: 700; font-size: 15px; cursor: pointer;
+    font-family: inherit;
+  }
+  .purchase-buy-btn:active { background: #006b4a; }
+  .purchase-cancel-btn {
+    width: 100%; background: none; border: none;
+    color: #5f6368; padding: 12px;
+    font-weight: 700; font-size: 14px; cursor: pointer;
+    font-family: inherit; margin-top: 4px;
+  }
+
+  /* === DAILY REWARD === */
+  .daily-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 14px 0;
+  }
+  .daily-cell {
+    background: linear-gradient(180deg, #fff 0%, var(--paper-warm) 100%);
+    border: 2px solid var(--butter-deep);
+    border-radius: 12px;
+    padding: 8px 4px;
+    text-align: center;
+    position: relative;
+  }
+  .daily-cell.claimed {
+    background: linear-gradient(180deg, var(--sage-light), var(--sage));
+    border-color: var(--sage-deep);
+  }
+  .daily-cell.today {
+    border-color: var(--rose);
+    box-shadow: 0 0 0 3px rgba(238,106,142,0.3);
+    animation: dailyPulse 1.5s infinite;
+  }
+  .daily-cell.day7 { grid-column: span 1; }
+  @keyframes dailyPulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(238,106,142,0.3); }
+    50% { box-shadow: 0 0 0 6px rgba(238,106,142,0.15); }
+  }
+  .daily-day-label { font-size: 9px; font-weight: 800; color: var(--caramel); text-transform: uppercase; }
+  .daily-reward-icon { font-size: 20px; margin: 2px 0; }
+  .daily-reward-amount { font-size: 11px; font-weight: 800; color: var(--caramel-dark); }
+  .daily-cell.claimed .daily-reward-amount,
+  .daily-cell.claimed .daily-day-label { color: #fff; }
+  .daily-check {
+    position: absolute; top: 2px; right: 4px;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+<div id="app-wrapper">
+<div id="app">
+
+  <!-- COVER / SPLASH SCREEN — first screen the player sees -->
+  <div id="screen-cover" class="screen active" onclick="dismissCover()">
+    <div class="cover-content">
+      <svg class="cover-illustration" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="cover-cake-frosting" cx="50%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#fff0f5"/>
+            <stop offset="60%" stop-color="#ffb0c4"/>
+            <stop offset="100%" stop-color="#ee6a8e"/>
+          </radialGradient>
+          <linearGradient id="cover-cake-base" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#f5b84a"/>
+            <stop offset="100%" stop-color="#c47a3a"/>
+          </linearGradient>
+          <linearGradient id="cover-plate" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#fff"/>
+            <stop offset="100%" stop-color="#e8d8c4"/>
+          </linearGradient>
+        </defs>
+        <!-- plate -->
+        <ellipse cx="100" cy="170" rx="80" ry="14" fill="rgba(122,63,18,0.2)"/>
+        <ellipse cx="100" cy="165" rx="75" ry="12" fill="url(#cover-plate)" stroke="#c8a888" stroke-width="2"/>
+        <!-- bottom cake tier -->
+        <rect x="40" y="120" width="120" height="45" rx="6" fill="url(#cover-cake-base)" stroke="#7a3f12" stroke-width="2"/>
+        <path d="M 40 130 Q 50 124 60 130 Q 70 124 80 130 Q 90 124 100 130 Q 110 124 120 130 Q 130 124 140 130 Q 150 124 160 130" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>
+        <!-- middle frosting layer -->
+        <path d="M 50 120 Q 50 108 60 110 Q 70 102 80 108 Q 90 100 100 106 Q 110 100 120 108 Q 130 102 140 110 Q 150 108 150 120 Z" fill="url(#cover-cake-frosting)" stroke="#b03a5e" stroke-width="2"/>
+        <!-- top tier -->
+        <rect x="65" y="78" width="70" height="36" rx="5" fill="url(#cover-cake-base)" stroke="#7a3f12" stroke-width="2"/>
+        <path d="M 65 86 Q 75 80 85 86 Q 95 80 105 86 Q 115 80 125 86 Q 135 82 135 86" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+        <!-- top frosting -->
+        <path d="M 70 78 Q 70 68 80 70 Q 90 62 100 68 Q 110 62 120 70 Q 130 68 130 78 Z" fill="url(#cover-cake-frosting)" stroke="#b03a5e" stroke-width="2"/>
+        <!-- berries on top -->
+        <circle cx="82" cy="64" r="5" fill="#c64168" stroke="#7a1a3a" stroke-width="1.5"/>
+        <ellipse cx="80" cy="62" rx="2" ry="1.2" fill="#fff" opacity="0.6"/>
+        <circle cx="100" cy="58" r="6" fill="#c64168" stroke="#7a1a3a" stroke-width="1.5"/>
+        <ellipse cx="98" cy="56" rx="2.4" ry="1.4" fill="#fff" opacity="0.6"/>
+        <circle cx="118" cy="64" r="5" fill="#c64168" stroke="#7a1a3a" stroke-width="1.5"/>
+        <ellipse cx="116" cy="62" rx="2" ry="1.2" fill="#fff" opacity="0.6"/>
+        <!-- candle -->
+        <rect x="97" y="38" width="6" height="22" rx="1" fill="#ffd478" stroke="#c89400" stroke-width="1.2"/>
+        <path d="M 100 38 Q 96 32 100 24 Q 104 32 100 38 Z" fill="#ffce4a"/>
+        <path d="M 100 32 Q 98 28 100 22 Q 102 28 100 32 Z" fill="#fff" opacity="0.8"/>
+        <!-- sparkles -->
+        <circle cx="50" cy="50" r="2" fill="#f4b740"/>
+        <circle cx="150" cy="60" r="2.5" fill="#f4b740"/>
+        <circle cx="40" cy="90" r="1.5" fill="#f4b740"/>
+        <circle cx="160" cy="100" r="2" fill="#f4b740"/>
+        <circle cx="170" cy="50" r="1.5" fill="#f4b740"/>
+        <circle cx="30" cy="70" r="2" fill="#f4b740"/>
+      </svg>
+      <div class="cover-logo">Sweet Match<br>Bakery</div>
+      <div class="cover-tagline">~ a deliciously sweet puzzle ~</div>
+      <div class="cover-tap-prompt">Tap to Play</div>
+      <div class="cover-footer" onclick="event.stopPropagation()">
+        <a onclick="showTerms()">Terms</a>
+        <span>·</span>
+        <a onclick="showPrivacy()">Privacy</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TERMS OF SERVICE -->
+  <div id="screen-terms" class="screen">
+    <div class="map-header" style="max-width:600px;">
+      <button class="back-btn" onclick="goToHome()">← Back</button>
+      <div class="map-title">Terms of Service</div>
+      <div style="width: 60px"></div>
+    </div>
+    <div class="legal-content">
+      <div class="panel">
+        <div class="updated">Last updated: May 14, 2026</div>
+        <p>Welcome to Sweet Match Bakery ("the Game"). By downloading, installing, or playing the Game, you agree to be bound by these Terms of Service ("Terms"). If you do not agree, please do not use the Game.</p>
+
+        <h2>1. Eligibility</h2>
+        <p>You must be at least 13 years old to use the Game. If you are under 18, you must have permission from a parent or legal guardian. By using the Game, you represent that you meet these requirements.</p>
+
+        <h2>2. License to Use</h2>
+        <p>We grant you a personal, non-exclusive, non-transferable, revocable license to use the Game for your personal, non-commercial entertainment, subject to these Terms.</p>
+
+        <h2>3. Virtual Items and In-App Purchases</h2>
+        <ul>
+          <li>The Game may offer virtual currency (coins) and items that can be earned through gameplay or purchased with real money.</li>
+          <li>Virtual currency and items have no real-world value and cannot be exchanged for cash, real-world goods, or refunded except as required by law.</li>
+          <li>All purchases are final unless required otherwise by applicable consumer protection law or the policies of your app store.</li>
+          <li>We may modify, add, or remove virtual items at any time without notice.</li>
+        </ul>
+
+        <h2>4. Advertisements</h2>
+        <p>The Game is supported by advertisements, including rewarded ads that grant in-game benefits. Ads are provided by third-party networks. We do not control the content of these ads.</p>
+
+        <h2>5. User Conduct</h2>
+        <p>You agree not to:</p>
+        <ul>
+          <li>Use cheats, exploits, automation, bots, or unauthorized third-party software</li>
+          <li>Modify, reverse-engineer, or decompile the Game</li>
+          <li>Use the Game for any unlawful purpose</li>
+          <li>Attempt to gain unauthorized access to any portion of the Game or its systems</li>
+        </ul>
+
+        <h2>6. Intellectual Property</h2>
+        <p>All rights, title, and interest in and to the Game, including all art, code, levels, music, and trademarks, are owned by us or our licensors. Nothing in these Terms transfers ownership to you.</p>
+
+        <h2>7. Disclaimer</h2>
+        <p>The Game is provided "as is" and "as available" without warranties of any kind, either express or implied. We do not guarantee that the Game will be uninterrupted, error-free, or secure.</p>
+
+        <h2>8. Limitation of Liability</h2>
+        <p>To the maximum extent permitted by law, we are not liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Game. Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim, or $50, whichever is greater.</p>
+
+        <h2>9. Changes to These Terms</h2>
+        <p>We may update these Terms from time to time. Continued use of the Game after changes means you accept the updated Terms. Material changes will be noted in the Game.</p>
+
+        <h2>10. Termination</h2>
+        <p>We may suspend or terminate your access to the Game at any time, for any reason, including violation of these Terms.</p>
+
+        <h2>11. Governing Law</h2>
+        <p>These Terms are governed by the laws of the United States and your state of residence, without regard to its conflict of law principles.</p>
+
+        <h2>12. Contact</h2>
+        <p>For questions about these Terms, contact: thesweetmatchbakery@gmail.com</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIVACY POLICY -->
+  <div id="screen-privacy" class="screen">
+    <div class="map-header" style="max-width:600px;">
+      <button class="back-btn" onclick="goToHome()">← Back</button>
+      <div class="map-title">Privacy Policy</div>
+      <div style="width: 60px"></div>
+    </div>
+    <div class="legal-content">
+      <div class="panel">
+        <div class="updated">Last updated: May 14, 2026</div>
+        <p>This Privacy Policy explains how Sweet Match Bakery ("we", "us", "our") collects, uses, and shares information when you use our Game.</p>
+
+        <h2>1. Information We Collect</h2>
+        <h3>Information you provide directly</h3>
+        <p>We do not require you to create an account to play. If you contact our support team, we collect the information you provide (such as email and message content).</p>
+
+        <h3>Information collected automatically</h3>
+        <ul>
+          <li><b>Device information</b>: device type, operating system, language, region, screen size</li>
+          <li><b>Gameplay data</b>: levels completed, time spent in the Game, in-game progress, settings preferences</li>
+          <li><b>Advertising identifiers</b>: such as Google Advertising ID, used by ad networks to serve relevant ads</li>
+          <li><b>Crash and performance data</b>: technical logs to help us fix bugs</li>
+        </ul>
+
+        <h3>Information stored on your device</h3>
+        <p>The Game saves your progress, coins, and unlocked treats locally on your device. This data is not transmitted to us unless required for a feature you opt into.</p>
+
+        <h2>2. How We Use Information</h2>
+        <ul>
+          <li>To operate, maintain, and improve the Game</li>
+          <li>To save and restore your progress</li>
+          <li>To serve relevant advertisements</li>
+          <li>To respond to support requests</li>
+          <li>To detect, prevent, and address fraud or abuse</li>
+          <li>To comply with legal obligations</li>
+        </ul>
+
+        <h2>3. Third-Party Services</h2>
+        <p>We use the following third-party services that may collect information:</p>
+        <ul>
+          <li><b>Google AdMob</b> — serves advertisements. See <a href="https://policies.google.com/privacy" target="_blank" style="color:var(--rose-deep);">Google's Privacy Policy</a>.</li>
+          <li><b>Google Play Services</b> — handles purchases and platform features. See Google's Privacy Policy.</li>
+          <li><b>Analytics (Firebase Analytics)</b> — measures gameplay metrics. Data is aggregated and anonymized where possible.</li>
+        </ul>
+
+        <h2>4. Children's Privacy</h2>
+        <p>The Game is not intended for children under 13. We do not knowingly collect personal information from children under 13. If we learn that we have collected such information, we will delete it. Parents who believe their child has provided personal information may contact us at the email below.</p>
+
+        <h2>5. Your Choices</h2>
+        <ul>
+          <li><b>Reset progress</b>: In the Game's settings, you can reset all local data at any time.</li>
+          <li><b>Opt out of personalized ads</b>: You can limit ad tracking through your device settings (Android: Settings > Google > Ads).</li>
+          <li><b>Uninstall</b>: Uninstalling the Game removes all locally stored data.</li>
+        </ul>
+
+        <h2>6. Data Security</h2>
+        <p>We use reasonable measures to protect information from loss, theft, misuse, and unauthorized access. However, no method of transmission or storage is 100% secure.</p>
+
+        <h2>7. International Users</h2>
+        <p>If you are located outside the United States, please be aware that information may be processed in the U.S. or other countries where laws may differ from those in your jurisdiction.</p>
+
+        <h2>8. California Privacy Rights (CCPA)</h2>
+        <p>California residents have the right to know what personal information we collect, request deletion, and opt out of the sale of personal information. We do not sell personal information.</p>
+
+        <h2>9. European Privacy Rights (GDPR)</h2>
+        <p>If you are in the European Economic Area, you have rights to access, correct, delete, restrict, or object to processing of your personal data, and the right to data portability. To exercise these rights, contact us at the email below.</p>
+
+        <h2>10. Changes to This Policy</h2>
+        <p>We may update this Privacy Policy. Material changes will be announced within the Game. Continued use of the Game means you accept the updated Policy.</p>
+
+        <h2>11. Contact</h2>
+        <p>For privacy questions or requests, contact: <b>thesweetmatchbakery@gmail.com</b></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-home" class="screen">
+    <h1 class="home-logo">Sweet Match<br>Bakery</h1>
+    <p class="home-sub">~ a deliciously sweet puzzle ~</p>
+    <div style="display:flex; gap:10px; margin-bottom:16px; align-items:center;">
+      <div style="background: linear-gradient(180deg, #ffe177, #ffb800); color: #6b4500; font-weight: 800; padding: 6px 16px; border-radius: 16px; box-shadow: 0 3px 0 #c98a00; font-size: 15px;">
+        🪙 <span id="home-coins">500</span>
+      </div>
+      <div id="home-lives" style="background: linear-gradient(180deg, #ffd0dd, #ff8aab); color: #fff; font-weight: 800; padding: 6px 14px; border-radius: 16px; box-shadow: 0 3px 0 #b03a5e; font-size: 13px; text-shadow: 0 1px 0 rgba(0,0,0,0.2);">
+        ❤️❤️❤️❤️❤️
+      </div>
+    </div>
+    <div class="bakery-display">
+      <div class="bakery-title">🍰 Your Bakery</div>
+      <div class="bakery-subtitle" id="bakery-subtitle">0 / 40 treats unlocked</div>
+      <div class="bakery-shelf" id="bakery-shelf"></div>
+      <div class="progress-bar"><div class="progress-fill" id="bakery-progress"></div></div>
+      <div class="progress-text" id="bakery-progress-text">0 / 130 levels complete</div>
+    </div>
+    <div class="home-button-stack">
+      <button class="btn" onclick="goToMap()">Play</button>
+      <button class="btn btn-secondary btn-small" onclick="goToShop('home')">🪙 Sweet Shop</button>
+      <button class="btn btn-secondary btn-small" onclick="showHowToPlay()">How to Play</button>
+      <button class="btn btn-secondary btn-small" id="sound-toggle-btn" onclick="toggleSound()">🔊 Sound: On</button>
+      <button class="btn btn-secondary btn-small" onclick="resetProgress()">Reset Progress</button>
+      <div class="home-legal-links">
+        <a onclick="showTerms()">Terms</a>
+        <span>·</span>
+        <a onclick="showPrivacy()">Privacy</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW TO PLAY SCREEN -->
+  <div id="screen-howto" class="screen">
+    <div class="map-header" style="max-width:420px;">
+      <button class="back-btn" onclick="goToHome()">← Back</button>
+      <div class="map-title">How to Play</div>
+      <div style="width: 60px"></div>
+    </div>
+    <div class="howto-content">
+      <div class="howto-section">
+        <div class="howto-icon">🔄</div>
+        <div class="howto-text">
+          <b>Swap to match.</b> Tap a treat, then tap a neighbor to swap them. Line up <b>3 or more</b> of the same kind in a row or column to clear them.
+        </div>
+      </div>
+      <div class="howto-section">
+        <div class="howto-icon">⭐</div>
+        <div class="howto-text">
+          <b>Score points.</b> Every cleared treat scores. Cascades (treats falling into new matches) score extra automatically.
+        </div>
+      </div>
+      <div class="howto-section">
+        <div class="howto-icon">✨</div>
+        <div class="howto-text">
+          <b>Make a color bomb.</b> Match <b>5 or more</b> of the same treat to create a sparkling color bomb. Swap it with any treat to clear every treat of that color.
+        </div>
+      </div>
+      <div class="howto-section">
+        <div class="howto-icon">🎯</div>
+        <div class="howto-text">
+          <b>Three goal types:</b><br>
+          <span style="color:var(--caramel-dark)">⭐ Score</span> — reach a target before running out of moves<br>
+          <span style="color:var(--caramel-dark)">🟦 Jelly</span> — clear all blue jelly squares by matching on top of them<br>
+          <span style="color:var(--caramel-dark)">📦 Collect</span> — gather a set number of specific treats
+        </div>
+      </div>
+      <div class="howto-section">
+        <div class="howto-icon">🍰</div>
+        <div class="howto-text">
+          <b>Build your bakery.</b> Each level you finish unlocks a new treat on your bakery shelf.
+        </div>
+      </div>
+      <button class="btn" style="margin: 20px auto;" onclick="goToMap()">Got it — Play!</button>
+    </div>
+  </div>
+
+  <div id="screen-map" class="screen">
+    <div class="map-header">
+      <button class="back-btn" onclick="goToHome()">← Back</button>
+      <div class="map-title">Select Level</div>
+      <div style="width: 60px"></div>
+    </div>
+    <div class="level-grid" id="level-grid"></div>
+  </div>
+
+  <!-- SHOP SCREEN -->
+  <div id="screen-shop" class="screen">
+    <div class="map-header" style="max-width:480px;">
+      <button class="back-btn" onclick="goToHome()">← Back</button>
+      <div class="map-title">Sweet Shop</div>
+      <div class="shop-coin-display">🪙 <span id="shop-coin-count">0</span></div>
+    </div>
+    <div class="shop-content" id="shop-content"></div>
+  </div>
+
+  <div id="screen-game" class="screen" style="overflow-y:hidden;justify-content:center;">
+    <div class="game-top">
+      <button class="back-btn" onclick="quitLevel()">← Quit</button>
+      <div class="stat-box"><div class="stat-label">Level</div><div class="stat-value" id="stat-level">1</div></div>
+      <div class="stat-box"><div class="stat-label">Moves</div><div class="stat-value" id="stat-moves">0</div></div>
+      <div class="stat-box"><div class="stat-label">Score</div><div class="stat-value" id="stat-score">0</div></div>
+    </div>
+    <div class="objective-banner" id="objective-banner"></div>
+    <div class="board-container"><div class="board" id="board"></div></div>
+    <div class="booster-bar">
+      <button class="booster-btn" id="booster-hammer" onclick="activateBooster('hammer')">
+        <div class="booster-icon">🔨</div>
+        <div class="booster-label">Hammer</div>
+        <div class="booster-count" id="count-hammer">3</div>
+      </button>
+      <button class="booster-btn" id="booster-swap" onclick="activateBooster('swap')">
+        <div class="booster-icon">🔄</div>
+        <div class="booster-label">Swap</div>
+        <div class="booster-count" id="count-swap">3</div>
+      </button>
+      <button class="booster-btn" id="booster-bomb" onclick="activateBooster('bomb')">
+        <div class="booster-icon">💣</div>
+        <div class="booster-label">Bomb</div>
+        <div class="booster-count" id="count-bomb">3</div>
+      </button>
+    </div>
+    <div id="booster-hint" class="booster-hint" style="display:none;"></div>
+  </div>
+
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-sub" id="modal-sub"></div>
+      <div class="modal-stars" id="modal-stars"></div>
+      <div id="modal-extra"></div>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+
+  <!-- DAILY REWARD MODAL -->
+  <div class="modal-backdrop" id="daily-modal">
+    <div class="modal">
+      <div class="modal-title">Daily Treat! 🎁</div>
+      <div class="modal-sub" id="daily-sub">Come back every day for bigger rewards</div>
+      <div class="daily-grid" id="daily-grid"></div>
+      <div class="modal-actions">
+        <button class="btn" id="daily-claim-btn" onclick="claimDailyReward()">Claim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REMOVE-BEFORE-LAUNCH-PURCHASE-SHEET
+       This entire mock purchase sheet is FAKE. Delete this whole <div>
+       and its CSS (.purchase-backdrop, .purchase-card, etc.) once real
+       Google Play Billing is wired in. Real billing shows its own
+       native purchase dialog. -->
+  <!-- FAKE GOOGLE PLAY PURCHASE SHEET (prototype only) -->
+  <div class="purchase-backdrop" id="purchase-sheet">
+    <div class="purchase-card">
+      <div class="purchase-gplay-header">
+        <span class="purchase-gplay-icon">▶</span>
+        <span>Google Play</span>
+      </div>
+      <div class="purchase-body">
+        <div class="purchase-item-row">
+          <div class="purchase-item-icon" id="purchase-item-icon">🪙</div>
+          <div class="purchase-item-info">
+            <div class="purchase-item-title" id="purchase-item-title">Bag of Coins</div>
+            <div class="purchase-item-sub">Sweet Match Bakery</div>
+          </div>
+          <div class="purchase-item-price" id="purchase-item-price">$1.99</div>
+        </div>
+        <div class="purchase-payment-row">
+          <span>💳 •••• 4242</span>
+          <span style="opacity:0.5;">▾</span>
+        </div>
+        <div class="purchase-prototype-note">⚠️ Prototype mode — no real charge. This screen mimics the Google Play purchase flow.</div>
+        <button class="purchase-buy-btn" id="purchase-buy-btn" onclick="confirmFakePurchase()">Buy</button>
+        <button class="purchase-cancel-btn" onclick="cancelFakePurchase()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+/* === CrazyGames Version — no external ads === */
+
+
+// =====================================================================
+// SOUND ENGINE — procedurally generated via Web Audio API
+// =====================================================================
+// Why procedural: no audio files = no licensing concerns, no asset bloat,
+// works offline, sounds tweakable in code. Trade-off: slightly less rich
+// than designed audio, but plenty satisfying for casual puzzle.
+//
+// User preference saved to localStorage. Audio context created lazily
+// on first user interaction (required by browser autoplay policies).
+// =====================================================================
+
+const SFX = {
+  ctx: null,
+  enabled: true,
+  initialized: false,
+
+  init() {
+    if (this.initialized) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      this.ctx = new AC();
+      this.initialized = true;
+    } catch (e) {
+      console.warn('[SFX] Web Audio unavailable:', e);
+    }
+  },
+
+  // Resume context if suspended (mobile autoplay policy)
+  ensureRunning() {
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  },
+
+  setEnabled(on) {
+    this.enabled = on;
+    try { localStorage.setItem('smb_sfx', on ? '1' : '0'); } catch (e) {}
+  },
+
+  loadPref() {
+    try {
+      const v = localStorage.getItem('smb_sfx');
+      if (v === '0') this.enabled = false;
+    } catch (e) {}
+  },
+
+  // Core: play a tone with envelope. freq Hz, duration s, type oscillator wave
+  tone(freq, duration, type = 'sine', volume = 0.15, attack = 0.005, release = 0.1) {
+    if (!this.enabled || !this.ctx) return;
+    this.ensureRunning();
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(volume, now + attack);
+    gain.gain.linearRampToValueAtTime(volume * 0.6, now + duration - release);
+    gain.gain.linearRampToValueAtTime(0, now + duration);
+    osc.connect(gain).connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + duration);
+  },
+
+  // Pitch-sweep — useful for whooshes, drops, rises
+  sweep(freqStart, freqEnd, duration, type = 'sine', volume = 0.15) {
+    if (!this.enabled || !this.ctx) return;
+    this.ensureRunning();
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freqStart, now);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(1, freqEnd), now + duration);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(volume, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    osc.connect(gain).connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + duration);
+  },
+
+  // === Game-specific sounds ===
+  buttonTap() {
+    this.tone(800, 0.05, 'square', 0.06);
+  },
+  tileSelect() {
+    this.tone(660, 0.08, 'triangle', 0.10);
+  },
+  tileSwap() {
+    this.sweep(400, 700, 0.12, 'triangle', 0.10);
+  },
+  match(chainLevel = 0) {
+    // Modern layered "pop" — transient + body + high-end sparkle
+    // Cascade level shifts the whole stack up the pentatonic scale
+    const baseFreqs = [523, 587, 659, 784, 880, 1047, 1175, 1319]; // C5–E6
+    const f = baseFreqs[Math.min(chainLevel, baseFreqs.length - 1)];
+    // Body — sine for warmth
+    this.tone(f, 0.16, 'sine', 0.16, 0.003, 0.1);
+    // Transient click — square, very short, gives the "pop"
+    this.tone(f * 2, 0.04, 'square', 0.08, 0.001, 0.02);
+    // Sparkle harmonic on top
+    setTimeout(() => this.tone(f * 3, 0.09, 'sine', 0.06, 0.002, 0.06), 20);
+    // Subtle bass thump for satisfaction
+    this.tone(f * 0.5, 0.12, 'triangle', 0.10, 0.002, 0.08);
+  },
+  cascade() {
+    this.sweep(800, 1400, 0.15, 'sine', 0.10);
+  },
+  colorBomb() {
+    this.sweep(1200, 200, 0.4, 'sawtooth', 0.15);
+    setTimeout(() => this.tone(1200, 0.15, 'sine', 0.12), 80);
+    setTimeout(() => this.tone(1600, 0.15, 'sine', 0.12), 160);
+  },
+  booster() {
+    // Magical chime — ascending arpeggio (booster SELECTED)
+    this.tone(659, 0.12, 'triangle', 0.12);
+    setTimeout(() => this.tone(784, 0.12, 'triangle', 0.12), 80);
+    setTimeout(() => this.tone(1047, 0.18, 'triangle', 0.12), 160);
+  },
+  hammerHit() {
+    // Sharp percussive smash — quick noisy thunk
+    this.tone(140, 0.12, 'square', 0.18, 0.002, 0.06);
+    this.sweep(500, 90, 0.14, 'sawtooth', 0.12);
+    setTimeout(() => this.tone(220, 0.06, 'triangle', 0.08), 40);
+  },
+  bombHit() {
+    // Big explosion — low boom + descending rumble
+    this.tone(80, 0.35, 'sawtooth', 0.20, 0.002, 0.2);
+    this.sweep(400, 60, 0.4, 'square', 0.16);
+    setTimeout(() => this.tone(120, 0.2, 'triangle', 0.12), 60);
+    setTimeout(() => this.tone(90, 0.15, 'sine', 0.10), 140);
+  },
+  swapWhoosh() {
+    // Booster swap complete — double whoosh
+    this.sweep(300, 800, 0.14, 'triangle', 0.12);
+    setTimeout(() => this.sweep(800, 300, 0.14, 'triangle', 0.10), 90);
+  },
+  levelComplete() {
+    // Triumphant little jingle: C-E-G-C major
+    this.tone(523, 0.18, 'triangle', 0.16);
+    setTimeout(() => this.tone(659, 0.18, 'triangle', 0.16), 140);
+    setTimeout(() => this.tone(784, 0.18, 'triangle', 0.16), 280);
+    setTimeout(() => this.tone(1047, 0.4, 'triangle', 0.18), 420);
+  },
+  levelFail() {
+    // Gentle "aww" — descending
+    this.tone(440, 0.2, 'triangle', 0.14);
+    setTimeout(() => this.tone(370, 0.3, 'triangle', 0.14), 180);
+  },
+  coin() {
+    this.tone(1175, 0.06, 'sine', 0.12);
+    setTimeout(() => this.tone(1568, 0.12, 'sine', 0.14), 50);
+  },
+  invalidMove() {
+    this.tone(180, 0.08, 'sawtooth', 0.08);
+  },
+  newTreat() {
+    // Special unlock fanfare
+    this.tone(784, 0.1, 'triangle', 0.14);
+    setTimeout(() => this.tone(988, 0.1, 'triangle', 0.14), 80);
+    setTimeout(() => this.tone(1175, 0.1, 'triangle', 0.14), 160);
+    setTimeout(() => this.tone(1568, 0.3, 'triangle', 0.16), 240);
+  },
+};
+
+const TYPES = ['strawberry', 'blueberry', 'lemon', 'mint', 'grape', 'choco'];
+// Emojis used in objective banner and milestone displays.
+// These match the bakery item each tile illustrates:
+//   strawberry → macaron, blueberry → muffin, lemon → glazed donut,
+//   mint → cookie, grape → cupcake, choco → chocolate donut
+const TYPE_EMOJI = { strawberry: '🍩', blueberry: '🧁', lemon: '🍩', mint: '🍪', grape: '🧁', choco: '🍩' };
+
+// Painterly SVG illustrations for bakery tiles. Each ~100x100, soft-edged.
+// Designed to be visually distinctive at small sizes (~40px on screen).
+const TYPE_SVG = {
+  // Strawberry Macaron — pink shell with cream filling
+  strawberry: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="mac-top" cx="35%" cy="20%" r="80%">
+        <stop offset="0%" stop-color="#ffe0eb"/>
+        <stop offset="30%" stop-color="#ff7aa8"/>
+        <stop offset="100%" stop-color="#c61852"/>
+      </radialGradient>
+      <radialGradient id="mac-bottom" cx="35%" cy="80%" r="80%">
+        <stop offset="0%" stop-color="#ff95b8"/>
+        <stop offset="100%" stop-color="#b01242"/>
+      </radialGradient>
+      <linearGradient id="mac-cream" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#fff8e8"/>
+        <stop offset="100%" stop-color="#ffd9a8"/>
+      </linearGradient>
+    </defs>
+    <!-- top shell -->
+    <ellipse cx="50" cy="38" rx="36" ry="22" fill="url(#mac-top)"/>
+    <!-- foot/feet on top shell -->
+    <path d="M 16 42 Q 20 50 26 48 M 30 50 Q 34 56 40 53 M 60 53 Q 66 56 70 50 M 74 48 Q 80 50 84 42"
+          stroke="#c61852" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.55"/>
+    <!-- cream filling -->
+    <rect x="14" y="46" width="72" height="14" rx="2" fill="url(#mac-cream)"/>
+    <!-- bottom shell -->
+    <ellipse cx="50" cy="68" rx="36" ry="20" fill="url(#mac-bottom)"/>
+    <path d="M 16 64 Q 20 58 26 60 M 30 56 Q 34 52 40 55 M 60 55 Q 66 52 70 56 M 74 60 Q 80 58 84 64"
+          stroke="#9c0f3a" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.5"/>
+    <!-- glossy highlight on top -->
+    <ellipse cx="38" cy="28" rx="14" ry="6" fill="#fff" opacity="0.55"/>
+    <ellipse cx="34" cy="26" rx="6" ry="2.5" fill="#fff" opacity="0.85"/>
+  </svg>`,
+
+  // Blueberry Muffin — golden muffin top with blueberries peeking through
+  blueberry: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="muf-top" cx="40%" cy="25%" r="80%">
+        <stop offset="0%" stop-color="#ffe09c"/>
+        <stop offset="40%" stop-color="#e8a548"/>
+        <stop offset="100%" stop-color="#9a5f1a"/>
+      </radialGradient>
+      <linearGradient id="muf-wrap" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#5874e8"/>
+        <stop offset="100%" stop-color="#2a3a9c"/>
+      </linearGradient>
+      <radialGradient id="bb-grad" cx="35%" cy="30%" r="70%">
+        <stop offset="0%" stop-color="#9cb0f0"/>
+        <stop offset="55%" stop-color="#3d54b8"/>
+        <stop offset="100%" stop-color="#1a2470"/>
+      </radialGradient>
+    </defs>
+    <!-- paper wrapper -->
+    <path d="M 22 56 L 78 56 L 73 88 L 27 88 Z" fill="url(#muf-wrap)"/>
+    <!-- wrapper pleats -->
+    <path d="M 35 56 L 32 86 M 50 56 L 50 88 M 65 56 L 68 86"
+          stroke="#1a2470" stroke-width="1.5" opacity="0.5"/>
+    <!-- muffin top (mushroomed over wrapper) -->
+    <path d="M 14 60 Q 12 38 30 32 Q 38 22 50 26 Q 62 22 70 32 Q 88 38 86 60
+             Q 80 58 72 58 Q 50 56 28 58 Q 20 58 14 60 Z"
+          fill="url(#muf-top)"/>
+    <!-- blueberries poking through -->
+    <circle cx="32" cy="42" r="6.5" fill="url(#bb-grad)"/>
+    <ellipse cx="30" cy="40" rx="2.5" ry="1.5" fill="#fff" opacity="0.6"/>
+    <circle cx="58" cy="34" r="7" fill="url(#bb-grad)"/>
+    <ellipse cx="55.5" cy="32" rx="2.8" ry="1.5" fill="#fff" opacity="0.6"/>
+    <circle cx="70" cy="46" r="6" fill="url(#bb-grad)"/>
+    <ellipse cx="68" cy="44.5" rx="2.5" ry="1.3" fill="#fff" opacity="0.6"/>
+    <circle cx="44" cy="48" r="5" fill="url(#bb-grad)"/>
+    <ellipse cx="42.5" cy="47" rx="2" ry="1.2" fill="#fff" opacity="0.6"/>
+    <!-- glossy highlight -->
+    <ellipse cx="38" cy="32" rx="10" ry="4" fill="#fff" opacity="0.35"/>
+  </svg>`,
+
+  // Lemon Tart — golden crust shell with bright lemon curd
+  lemon: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="ld-body" cx="40%" cy="30%" r="75%">
+        <stop offset="0%" stop-color="#e8c890"/>
+        <stop offset="100%" stop-color="#8a5a18"/>
+      </radialGradient>
+      <radialGradient id="ld-glaze" cx="40%" cy="25%" r="80%">
+        <stop offset="0%" stop-color="#fff7c0"/>
+        <stop offset="45%" stop-color="#ffc418"/>
+        <stop offset="100%" stop-color="#c08800"/>
+      </radialGradient>
+    </defs>
+    <!-- donut body (outer ring) -->
+    <circle cx="50" cy="52" r="36" fill="url(#ld-body)"/>
+    <!-- lemon glaze on top (drippy) -->
+    <path d="M 14 52
+             Q 14 38 22 30 Q 32 18 50 18 Q 68 18 78 30 Q 86 38 86 52
+             Q 84 56 82 54 Q 78 60 74 56 Q 70 62 65 58 Q 60 64 54 60
+             Q 50 65 46 60 Q 40 64 35 58 Q 30 62 26 56 Q 22 60 18 54 Z"
+          fill="url(#ld-glaze)"/>
+    <!-- inner hole -->
+    <circle cx="50" cy="52" r="10" fill="url(#ld-body)"/>
+    <circle cx="50" cy="52" r="8" fill="#6a4018"/>
+    <circle cx="50" cy="52" r="8" fill="#3a2008" opacity="0.5"/>
+    <!-- lemon zest sprinkles on glaze -->
+    <rect x="28" y="34" width="6" height="2.5" rx="1.2" fill="#ffea60" transform="rotate(30 31 35)"/>
+    <rect x="58" y="28" width="6" height="2.5" rx="1.2" fill="#fff5b8" transform="rotate(-20 61 29)"/>
+    <rect x="68" y="40" width="6" height="2.5" rx="1.2" fill="#ffea60" transform="rotate(60 71 41)"/>
+    <rect x="22" y="48" width="6" height="2.5" rx="1.2" fill="#fff5b8" transform="rotate(-45 25 49)"/>
+    <rect x="70" y="58" width="6" height="2.5" rx="1.2" fill="#ffea60" transform="rotate(20 73 59)"/>
+    <rect x="34" y="64" width="6" height="2.5" rx="1.2" fill="#fff5b8" transform="rotate(-30 37 65)"/>
+    <!-- glaze glossy highlight -->
+    <ellipse cx="36" cy="28" rx="14" ry="5" fill="#fff" opacity="0.55"/>
+    <ellipse cx="34" cy="26" rx="6" ry="2" fill="#fff" opacity="0.95"/>
+  </svg>`,
+
+  // Mint Cookie — round cookie with chocolate chunks (clearer "cookie" shape)
+  mint: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="ck-body" cx="40%" cy="30%" r="75%">
+        <stop offset="0%" stop-color="#c8e8a8"/>
+        <stop offset="45%" stop-color="#7adb8e"/>
+        <stop offset="100%" stop-color="#2a8a4a"/>
+      </radialGradient>
+    </defs>
+    <!-- main cookie disk with bumpy edge (irregular outline) -->
+    <path d="M 50 16
+             Q 64 16 70 22
+             Q 82 24 84 38
+             Q 90 48 84 60
+             Q 84 74 72 80
+             Q 62 88 50 86
+             Q 36 90 28 82
+             Q 16 80 14 66
+             Q 10 54 16 42
+             Q 16 28 28 22
+             Q 36 14 50 16 Z"
+          fill="url(#ck-body)"/>
+    <!-- darker rim shadow -->
+    <path d="M 50 86 Q 36 90 28 82 Q 16 80 14 66"
+          stroke="#1a6a3a" stroke-width="2" fill="none" opacity="0.4"/>
+    <!-- chocolate chunks (bigger, more visible, fewer) -->
+    <ellipse cx="35" cy="38" rx="7" ry="6" fill="#3a1810" transform="rotate(-20 35 38)"/>
+    <ellipse cx="62" cy="42" rx="8" ry="6.5" fill="#3a1810" transform="rotate(15 62 42)"/>
+    <ellipse cx="42" cy="62" rx="7" ry="6" fill="#3a1810" transform="rotate(30 42 62)"/>
+    <ellipse cx="66" cy="64" rx="6.5" ry="5.5" fill="#3a1810" transform="rotate(-15 66 64)"/>
+    <ellipse cx="28" cy="58" rx="5" ry="4" fill="#3a1810" transform="rotate(45 28 58)"/>
+    <!-- chunk gloss highlights -->
+    <ellipse cx="33" cy="35" rx="3" ry="1.5" fill="#a85838" opacity="0.7"/>
+    <ellipse cx="60" cy="39" rx="3.5" ry="1.5" fill="#a85838" opacity="0.7"/>
+    <ellipse cx="40" cy="59" rx="3" ry="1.5" fill="#a85838" opacity="0.7"/>
+    <ellipse cx="64" cy="61" rx="2.5" ry="1.3" fill="#a85838" opacity="0.7"/>
+    <ellipse cx="27" cy="56" rx="2" ry="1" fill="#a85838" opacity="0.7"/>
+    <!-- subtle cookie texture dots -->
+    <circle cx="52" cy="32" r="1.5" fill="#2a8a4a" opacity="0.5"/>
+    <circle cx="22" cy="46" r="1.2" fill="#2a8a4a" opacity="0.5"/>
+    <circle cx="76" cy="52" r="1.5" fill="#2a8a4a" opacity="0.5"/>
+    <circle cx="54" cy="74" r="1.3" fill="#2a8a4a" opacity="0.5"/>
+    <!-- top glossy highlight -->
+    <ellipse cx="36" cy="26" rx="12" ry="5" fill="#fff" opacity="0.45"/>
+    <ellipse cx="34" cy="24" rx="5" ry="2" fill="#fff" opacity="0.85"/>
+  </svg>`,
+
+  // Grape Cupcake — purple frosted cupcake with swirl
+  grape: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="cup-frost" cx="35%" cy="25%" r="80%">
+        <stop offset="0%" stop-color="#f0c8ff"/>
+        <stop offset="45%" stop-color="#c656f0"/>
+        <stop offset="100%" stop-color="#6a2a8a"/>
+      </radialGradient>
+      <linearGradient id="cup-base" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#f5b070"/>
+        <stop offset="100%" stop-color="#a85a2a"/>
+      </linearGradient>
+    </defs>
+    <!-- cupcake paper wrapper -->
+    <path d="M 28 56 L 72 56 L 66 88 L 34 88 Z" fill="url(#cup-base)"/>
+    <!-- wrapper pleats -->
+    <path d="M 38 56 L 36 86 M 50 56 L 50 88 M 62 56 L 64 86"
+          stroke="#7a3a08" stroke-width="2" opacity="0.45" stroke-linecap="round"/>
+    <!-- frosting swirl (3 tiers piped on top) -->
+    <path d="M 22 58 Q 18 42 38 40 Q 38 30 50 32 Q 62 30 62 40 Q 82 42 78 58 Z" fill="url(#cup-frost)"/>
+    <path d="M 30 44 Q 30 32 50 28 Q 70 32 70 44 Q 70 36 50 36 Q 30 36 30 44 Z" fill="url(#cup-frost)"/>
+    <path d="M 38 32 Q 38 22 50 20 Q 62 22 62 32 Q 62 26 50 26 Q 38 26 38 32 Z" fill="url(#cup-frost)"/>
+    <!-- glossy swirl highlights -->
+    <path d="M 28 50 Q 36 44 44 48" stroke="#fff" stroke-width="3" fill="none" opacity="0.55" stroke-linecap="round"/>
+    <path d="M 36 36 Q 44 32 52 34" stroke="#fff" stroke-width="2.5" fill="none" opacity="0.55" stroke-linecap="round"/>
+    <!-- sprinkles -->
+    <rect x="34" y="42" width="5" height="2" rx="1" fill="#ffd24a" transform="rotate(-30 36 43)"/>
+    <rect x="56" y="40" width="5" height="2" rx="1" fill="#5fcf85" transform="rotate(40 58 41)"/>
+    <rect x="46" y="50" width="5" height="2" rx="1" fill="#ff4d7d" transform="rotate(15 48 51)"/>
+    <rect x="60" y="48" width="5" height="2" rx="1" fill="#ffd24a" transform="rotate(-20 62 49)"/>
+    <!-- top dot highlight -->
+    <ellipse cx="42" cy="22" rx="6" ry="2.5" fill="#fff" opacity="0.7"/>
+  </svg>`,
+
+  // Chocolate Donut — glazed chocolate donut with sprinkles
+  choco: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="dn-body" cx="40%" cy="30%" r="75%">
+        <stop offset="0%" stop-color="#d9a070"/>
+        <stop offset="100%" stop-color="#7a4018"/>
+      </radialGradient>
+      <radialGradient id="dn-glaze" cx="40%" cy="25%" r="80%">
+        <stop offset="0%" stop-color="#a86848"/>
+        <stop offset="50%" stop-color="#5a2a10"/>
+        <stop offset="100%" stop-color="#2a1008"/>
+      </radialGradient>
+    </defs>
+    <!-- donut body (outer ring) -->
+    <circle cx="50" cy="52" r="36" fill="url(#dn-body)"/>
+    <!-- chocolate glaze on top (drippy) -->
+    <path d="M 14 52
+             Q 14 38 22 30 Q 32 18 50 18 Q 68 18 78 30 Q 86 38 86 52
+             Q 84 56 82 54 Q 78 60 74 56 Q 70 62 65 58 Q 60 64 54 60
+             Q 50 65 46 60 Q 40 64 35 58 Q 30 62 26 56 Q 22 60 18 54 Z"
+          fill="url(#dn-glaze)"/>
+    <!-- inner hole -->
+    <circle cx="50" cy="52" r="10" fill="url(#dn-body)"/>
+    <circle cx="50" cy="52" r="8" fill="#5a3018"/>
+    <!-- inner hole shadow -->
+    <circle cx="50" cy="52" r="8" fill="#3a1810" opacity="0.5"/>
+    <!-- sprinkles on glaze -->
+    <rect x="28" y="34" width="6" height="2.5" rx="1.2" fill="#ff4d7d" transform="rotate(30 31 35)"/>
+    <rect x="58" y="28" width="6" height="2.5" rx="1.2" fill="#ffd24a" transform="rotate(-20 61 29)"/>
+    <rect x="68" y="40" width="6" height="2.5" rx="1.2" fill="#5fcf85" transform="rotate(60 71 41)"/>
+    <rect x="22" y="48" width="6" height="2.5" rx="1.2" fill="#5874e8" transform="rotate(-45 25 49)"/>
+    <rect x="70" y="58" width="6" height="2.5" rx="1.2" fill="#c656f0" transform="rotate(20 73 59)"/>
+    <rect x="34" y="64" width="6" height="2.5" rx="1.2" fill="#ffd24a" transform="rotate(-30 37 65)"/>
+    <rect x="60" y="68" width="6" height="2.5" rx="1.2" fill="#ff4d7d" transform="rotate(40 63 69)"/>
+    <!-- glaze glossy highlight -->
+    <ellipse cx="36" cy="28" rx="14" ry="5" fill="#fff" opacity="0.4"/>
+    <ellipse cx="34" cy="26" rx="6" ry="2" fill="#fff" opacity="0.85"/>
+  </svg>`,
+
+  // Color bomb — magical rainbow sphere
+  colorbomb: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="cb-body" cx="35%" cy="30%" r="75%">
+        <stop offset="0%" stop-color="#fff"/>
+        <stop offset="25%" stop-color="#ffd24a"/>
+        <stop offset="55%" stop-color="#ff4d7d"/>
+        <stop offset="100%" stop-color="#5874e8"/>
+      </radialGradient>
+    </defs>
+    <circle cx="50" cy="50" r="36" fill="url(#cb-body)"/>
+    <path d="M 50 18 L 53 30 L 65 26 L 58 36 L 70 42 L 58 48 L 65 60 L 53 56 L 50 68 L 47 56 L 35 60 L 42 48 L 30 42 L 42 36 L 35 26 L 47 30 Z" fill="#fff" opacity="0.7"/>
+    <ellipse cx="38" cy="34" rx="9" ry="6" fill="#fff" opacity="0.7"/>
+    <ellipse cx="36" cy="32" rx="3" ry="2" fill="#fff" opacity="0.95"/>
+  </svg>`
+};
+
+const LEVELS = [
+  { rows: 7, cols: 7, colors: 4, moves: 20, type: 'score', target: 2600 },
+  { rows: 7, cols: 7, colors: 4, moves: 18, type: 'score', target: 2900 },
+  { rows: 7, cols: 7, colors: 4, moves: 18, type: 'score', target: 3400 },
+  { rows: 7, cols: 7, colors: 5, moves: 20, type: 'score', target: 4400 },
+  { rows: 8, cols: 7, colors: 5, moves: 22, type: 'score', target: 5500 },
+  { rows: 7, cols: 7, colors: 5, moves: 20, type: 'jelly', jellyCount: 6 },
+  { rows: 7, cols: 7, colors: 5, moves: 22, type: 'jelly', jellyCount: 10 },
+  { rows: 8, cols: 7, colors: 5, moves: 24, type: 'jelly', jellyCount: 14 },
+  { rows: 8, cols: 7, colors: 5, moves: 22, type: 'collect', collectTarget: { strawberry: 10 } },
+  { rows: 8, cols: 7, colors: 5, moves: 24, type: 'collect', collectTarget: { lemon: 12, mint: 8 } },
+  { rows: 8, cols: 7, colors: 6, moves: 22, type: 'score', target: 8800 },
+  { rows: 8, cols: 7, colors: 6, moves: 22, type: 'jelly', jellyCount: 16, jellyLayers: 1 },
+  { rows: 8, cols: 8, colors: 6, moves: 25, type: 'collect', collectTarget: { strawberry: 15, blueberry: 15 } },
+  { rows: 8, cols: 8, colors: 6, moves: 24, type: 'score', target: 11400 },
+  { rows: 8, cols: 8, colors: 6, moves: 24, type: 'jelly', jellyCount: 20, jellyLayers: 1 },
+  { rows: 8, cols: 8, colors: 6, moves: 22, type: 'jelly', jellyCount: 12, jellyLayers: 2 },
+  { rows: 8, cols: 8, colors: 6, moves: 26, type: 'collect', collectTarget: { choco: 18, grape: 10 } },
+  { rows: 8, cols: 8, colors: 6, moves: 24, type: 'score', target: 13800 },
+  { rows: 8, cols: 8, colors: 6, moves: 25, type: 'jelly', jellyCount: 18, jellyLayers: 2 },
+  { rows: 8, cols: 8, colors: 6, moves: 25, type: 'collect', collectTarget: { strawberry: 12, lemon: 12, mint: 12 } },
+  { rows: 8, cols: 8, colors: 6, moves: 26, type: 'score', target: 16900 },
+  { rows: 8, cols: 8, colors: 6, moves: 26, type: 'jelly', jellyCount: 22, jellyLayers: 2 },
+  { rows: 8, cols: 8, colors: 6, moves: 28, type: 'collect', collectTarget: { blueberry: 16, grape: 10 } },
+  { rows: 8, cols: 8, colors: 6, moves: 28, type: 'score', target: 20300 },
+  { rows: 8, cols: 8, colors: 6, moves: 28, type: 'jelly', jellyCount: 22, jellyLayers: 2 },
+  { rows: 8, cols: 8, colors: 6, moves: 28, type: 'score', target: 21700 },
+  { rows: 8, cols: 8, colors: 6, moves: 30, type: 'collect', collectTarget: { strawberry: 10, blueberry: 10, lemon: 10, mint: 10 } },
+  { rows: 8, cols: 8, colors: 6, moves: 28, type: 'jelly', jellyCount: 24, jellyLayers: 2 },
+  { rows: 8, cols: 8, colors: 6, moves: 30, type: 'score', target: 25500 },
+  { rows: 8, cols: 8, colors: 6, moves: 32, type: 'collect', collectTarget: { strawberry: 14, blueberry: 14, lemon: 14, mint: 14, grape: 14, choco: 14 } },
+
+  // ===== LEVELS 31-50: World 2 — "Bakery Expansion" =====
+  // Difficulty plateaus then rises again. Mix all 3 objective types.
+  { rows: 8, cols: 8, colors: 6, moves: 25, type: 'score', target: 22000 },
+  { rows: 8, cols: 8, colors: 6, moves: 24, type: 'jelly', jellyCount: 20, jellyLayers: 2 },
+  { rows: 8, cols: 8, colors: 6, moves: 26, type: 'collect', collectTarget: { strawberry: 18, blueberry: 18 } },
+  { rows: 8, cols: 8, colors: 6, moves: 22, type: 'score', target: 19700 },
+  { rows: 9, cols: 8, colors: 6, moves: 25, type: 'jelly', jellyCount: 25, jellyLayers: 2 },
+  { rows: 9, cols: 8, colors: 6, moves: 26, type: 'collect', collectTarget: { lemon: 20, mint: 20, grape: 15 } },
+  { rows: 9, cols: 8, colors: 6, moves: 24, type: 'score', target: 21800 },
+  { rows: 9, cols: 8, colors: 6, moves: 26, type: 'jelly', jellyCount: 30, jellyLayers: 2 },
+  { rows: 9, cols: 8, colors: 6, moves: 25, type: 'collect', collectTarget: { choco: 22, grape: 18 } },
+  { rows: 9, cols: 8, colors: 6, moves: 22, type: 'score', target: 20400 },
+
+  { rows: 9, cols: 8, colors: 6, moves: 26, type: 'jelly', jellyCount: 35, jellyLayers: 2 },
+  { rows: 9, cols: 8, colors: 6, moves: 28, type: 'collect', collectTarget: { strawberry: 25, blueberry: 25, lemon: 25 } },
+  { rows: 9, cols: 8, colors: 6, moves: 24, type: 'score', target: 22600 },
+  { rows: 9, cols: 8, colors: 6, moves: 25, type: 'jelly', jellyCount: 28, jellyLayers: 2 },
+  { rows: 9, cols: 8, colors: 6, moves: 26, type: 'collect', collectTarget: { mint: 25, grape: 25 } },
+  { rows: 9, cols: 8, colors: 6, moves: 22, type: 'score', target: 21000 },
+  { rows: 9, cols: 8, colors: 6, moves: 27, type: 'jelly', jellyCount: 38, jellyLayers: 2 },
+  { rows: 9, cols: 8, colors: 6, moves: 28, type: 'collect', collectTarget: { choco: 30, strawberry: 20 } },
+  { rows: 9, cols: 8, colors: 6, moves: 24, type: 'score', target: 23300 },
+  { rows: 9, cols: 8, colors: 6, moves: 25, type: 'jelly', jellyCount: 40, jellyLayers: 2 },
+
+  // ===== LEVELS 51-70: World 3 — "Master Baker" =====
+  // Bigger boards, tighter moves, higher targets
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'collect', collectTarget: { strawberry: 25, blueberry: 25, lemon: 25, mint: 25 } },
+  { rows: 9, cols: 9, colors: 6, moves: 24, type: 'score', target: 23600 },
+  { rows: 9, cols: 9, colors: 6, moves: 25, type: 'jelly', jellyCount: 30, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 27, type: 'collect', collectTarget: { grape: 30, choco: 30 } },
+  { rows: 9, cols: 9, colors: 6, moves: 23, type: 'score', target: 23000 },
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'jelly', jellyCount: 36, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { strawberry: 30, lemon: 30, mint: 25 } },
+  { rows: 9, cols: 9, colors: 6, moves: 24, type: 'score', target: 24400 },
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'jelly', jellyCount: 42, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 25, type: 'collect', collectTarget: { blueberry: 35, grape: 25 } },
+
+  { rows: 9, cols: 9, colors: 6, moves: 23, type: 'score', target: 23600 },
+  { rows: 9, cols: 9, colors: 6, moves: 27, type: 'jelly', jellyCount: 38, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { choco: 35, strawberry: 25, blueberry: 25 } },
+  { rows: 9, cols: 9, colors: 6, moves: 24, type: 'score', target: 24800 },
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'jelly', jellyCount: 45, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { lemon: 30, mint: 30, grape: 30 } },
+  { rows: 9, cols: 9, colors: 6, moves: 23, type: 'score', target: 23900 },
+  { rows: 9, cols: 9, colors: 6, moves: 27, type: 'jelly', jellyCount: 48, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 25, type: 'collect', collectTarget: { strawberry: 40, choco: 30 } },
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'score', target: 27200 },
+
+  // ===== LEVELS 71-90: World 4 — "Grand Pâtissier" =====
+  // Stingier moves, brutal targets
+  { rows: 9, cols: 9, colors: 6, moves: 22, type: 'jelly', jellyCount: 32, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { blueberry: 35, lemon: 35, mint: 30 } },
+  { rows: 9, cols: 9, colors: 6, moves: 24, type: 'score', target: 25200 },
+  { rows: 9, cols: 9, colors: 6, moves: 23, type: 'jelly', jellyCount: 40, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 27, type: 'collect', collectTarget: { grape: 40, choco: 35 } },
+  { rows: 9, cols: 9, colors: 6, moves: 25, type: 'score', target: 26400 },
+  { rows: 9, cols: 9, colors: 6, moves: 24, type: 'jelly', jellyCount: 44, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { strawberry: 35, blueberry: 35, lemon: 35 } },
+  { rows: 9, cols: 9, colors: 6, moves: 22, type: 'score', target: 23400 },
+  { rows: 9, cols: 9, colors: 6, moves: 25, type: 'jelly', jellyCount: 50, jellyLayers: 2 },
+
+  { rows: 9, cols: 9, colors: 6, moves: 27, type: 'collect', collectTarget: { mint: 40, grape: 35, choco: 30 } },
+  { rows: 9, cols: 9, colors: 6, moves: 23, type: 'score', target: 24600 },
+  { rows: 9, cols: 9, colors: 6, moves: 24, type: 'jelly', jellyCount: 46, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { strawberry: 40, choco: 40 } },
+  { rows: 9, cols: 9, colors: 6, moves: 22, type: 'score', target: 23600 },
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'jelly', jellyCount: 52, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { blueberry: 40, lemon: 40, mint: 40 } },
+  { rows: 9, cols: 9, colors: 6, moves: 24, type: 'score', target: 25900 },
+  { rows: 9, cols: 9, colors: 6, moves: 25, type: 'jelly', jellyCount: 55, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 27, type: 'collect', collectTarget: { grape: 45, strawberry: 35, choco: 35 } },
+
+  // ===== LEVELS 91-110: World 5 — "Sweet Empire" =====
+  // Maximum challenge — endgame content
+  { rows: 9, cols: 9, colors: 6, moves: 23, type: 'score', target: 25000 },
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'jelly', jellyCount: 50, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { strawberry: 45, blueberry: 45, lemon: 45, mint: 45 } },
+  { rows: 9, cols: 9, colors: 6, moves: 24, type: 'score', target: 26200 },
+  { rows: 9, cols: 9, colors: 6, moves: 25, type: 'jelly', jellyCount: 58, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { grape: 50, choco: 45 } },
+  { rows: 9, cols: 9, colors: 6, moves: 22, type: 'score', target: 24200 },
+  { rows: 9, cols: 9, colors: 6, moves: 27, type: 'jelly', jellyCount: 60, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'collect', collectTarget: { strawberry: 50, lemon: 50, grape: 40 } },
+  { rows: 9, cols: 9, colors: 6, moves: 23, type: 'score', target: 25400 },
+
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'jelly', jellyCount: 54, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { blueberry: 50, mint: 50, choco: 40 } },
+  { rows: 9, cols: 9, colors: 6, moves: 24, type: 'score', target: 26700 },
+  { rows: 9, cols: 9, colors: 6, moves: 25, type: 'jelly', jellyCount: 62, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { strawberry: 50, blueberry: 50, lemon: 50, mint: 50 } },
+  { rows: 9, cols: 9, colors: 6, moves: 22, type: 'score', target: 24600 },
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'jelly', jellyCount: 65, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 27, type: 'collect', collectTarget: { grape: 55, choco: 55 } },
+  { rows: 9, cols: 9, colors: 6, moves: 23, type: 'score', target: 25800 },
+  { rows: 9, cols: 9, colors: 6, moves: 25, type: 'jelly', jellyCount: 68, jellyLayers: 2 },
+
+  // ===== LEVELS 111-130: World 6 — "Legend of the Bakery" =====
+  // Endgame — for the truly dedicated
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { strawberry: 55, lemon: 55, grape: 55 } },
+  { rows: 9, cols: 9, colors: 6, moves: 22, type: 'score', target: 24800 },
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'jelly', jellyCount: 70, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 27, type: 'collect', collectTarget: { blueberry: 55, mint: 55, choco: 55 } },
+  { rows: 9, cols: 9, colors: 6, moves: 23, type: 'score', target: 26100 },
+  { rows: 9, cols: 9, colors: 6, moves: 25, type: 'jelly', jellyCount: 72, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { strawberry: 60, blueberry: 60 } },
+  { rows: 9, cols: 9, colors: 6, moves: 22, type: 'score', target: 25100 },
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'jelly', jellyCount: 75, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 27, type: 'collect', collectTarget: { lemon: 60, mint: 60 } },
+
+  { rows: 9, cols: 9, colors: 6, moves: 23, type: 'score', target: 26400 },
+  { rows: 9, cols: 9, colors: 6, moves: 25, type: 'jelly', jellyCount: 78, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { grape: 60, choco: 60 } },
+  { rows: 9, cols: 9, colors: 6, moves: 22, type: 'score', target: 25400 },
+  { rows: 9, cols: 9, colors: 6, moves: 26, type: 'jelly', jellyCount: 80, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { strawberry: 65, blueberry: 65, lemon: 65 } },
+  { rows: 9, cols: 9, colors: 6, moves: 23, type: 'score', target: 26700 },
+  { rows: 9, cols: 9, colors: 6, moves: 24, type: 'jelly', jellyCount: 82, jellyLayers: 2 },
+  { rows: 9, cols: 9, colors: 6, moves: 28, type: 'collect', collectTarget: { mint: 65, grape: 65, choco: 65 } },
+  { rows: 9, cols: 9, colors: 6, moves: 22, type: 'score', target: 25600 },  // Final boss
+];
+
+const BAKERY_ITEMS = [
+  // World 1 — Basics (levels 1-30) — 10 items
+  '🍪','🧁','🥐','🍩','🍰','🥧','🎂','🍮','🍯','🥯',
+  // World 2 — Drinks & Pastries (levels 31-50) — 7 items
+  '🥨','🫖','☕','🍵','🥞','🧇','🥖',
+  // World 3 — Fruits & Sweets (levels 51-70) — 7 items
+  '🍓','🍒','🍑','🍇','🍫','🍬','🍭',
+  // World 4 — Premium Treats (levels 71-90) — 6 items
+  '🍡','🍢','🥮','🧊','🍨','🍦',
+  // World 5 — Exotic Delights (levels 91-110) — 5 items
+  '🥠','🫕','🍱','🍙','🥟',
+  // World 6 — Legendary Creations (levels 111-130) — 5 items
+  '🎁','🏆','👑','🌟','✨'
+];
+
+// =====================================================================
+// PERSISTENCE — localStorage save/load
+// =====================================================================
+// Saves persistent player data (progress, coins) but NOT in-flight level
+// state. This way a crash mid-level just returns the player to the map,
+// not into a corrupted level.
+//
+// When migrating to native (Capacitor), localStorage works inside the
+// Android WebView automatically. No changes needed.
+// =====================================================================
+
+const SAVE_KEY = 'sweet_match_bakery_v1';
+
+function saveProgress() {
+  try {
+    const data = {
+      progress: state.progress,
+      coins: state.coins,
+      ownedBoosters: state.ownedBoosters,
+      daily: state.daily,
+      lives: state.lives,
+      milestonesClaimed: state.milestonesClaimed,
+      version: 3,
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn('[Save] Failed to write:', e);
+    // Common cause: private browsing mode disables localStorage
+    // We continue gracefully — game still works, just won't persist
+  }
+}
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;  // no save yet
+    const data = JSON.parse(raw);
+    if (data.progress) state.progress = data.progress;
+    if (typeof data.coins === 'number') state.coins = data.coins;
+    if (data.ownedBoosters) state.ownedBoosters = data.ownedBoosters;
+    if (data.daily) state.daily = data.daily;
+    if (data.lives) state.lives = data.lives;
+    if (data.milestonesClaimed) state.milestonesClaimed = data.milestonesClaimed;
+    console.log('[Save] Loaded:', Object.keys(data.progress || {}).length, 'levels completed,', data.coins, 'coins');
+  } catch (e) {
+    console.warn('[Save] Failed to read (corrupted save?):', e);
+  }
+}
+
+function clearSave() {
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+}
+
+let state = {
+  currentLevel: 0,
+  progress: {},
+  coins: 500,  // Starting currency
+  // ownedBoosters = the player's persistent booster inventory (bought/earned).
+  // At level start, this is copied into the per-level `boosters` count.
+  ownedBoosters: { hammer: 3, swap: 3, bomb: 3 },
+  // Daily reward tracking
+  daily: { lastClaimDay: null, streak: 0 },
+  // Lives/hearts system
+  lives: { count: 5, lastRegen: null },  // lastRegen = timestamp ms of last heart gain
+  // Milestone rewards already claimed (level indices: 9, 19, 29, ...)
+  milestonesClaimed: {},
+  boosters: { hammer: 3, swap: 3, bomb: 3 },
+  activeBooster: null,
+  swapBoosterFirst: null,  // for the swap booster, holds the first tapped cell
+  grid: [], jellyGrid: [],
+  rows: 0, cols: 0, colors: 4,
+  movesLeft: 0, score: 0,
+  level: null, collected: {}, jellyLeft: 0,
+  selectedCell: null, busy: false, gameOver: false,
+  colorBombArmed: null,  // [r,c] of an armed color bomb waiting for color choice
+  continueUsed: false,  // can only buy moves once per level
+};
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goToHome() { renderHome(); show('screen-home'); }
+function goToMap() { hideModal(); renderMap(); show('screen-map'); }
+function showHowToPlay() { show('screen-howto'); }
+function showTerms() { show('screen-terms'); window.scrollTo(0, 0); }
+function showPrivacy() { show('screen-privacy'); window.scrollTo(0, 0); }
+
+function toggleSound() {
+  SFX.init();  // ensure context exists
+  SFX.setEnabled(!SFX.enabled);
+  if (SFX.enabled) SFX.buttonTap();
+  updateSoundButton();
+}
+function updateSoundButton() {
+  const btn = document.getElementById('sound-toggle-btn');
+  if (btn) btn.textContent = SFX.enabled ? '🔊 Sound: On' : '🔇 Sound: Off';
+}
+
+// ===== LIVES / HEARTS SYSTEM =====
+const MAX_LIVES = 5;
+const LIVE_REGEN_MS = 25 * 60 * 1000;  // 25 minutes per heart
+
+// Process passive regeneration based on elapsed time
+function updateLives() {
+  if (state.lives.count >= MAX_LIVES) {
+    state.lives.lastRegen = null;
+    return;
+  }
+  const now = Date.now();
+  if (!state.lives.lastRegen) {
+    state.lives.lastRegen = now;
+    return;
+  }
+  const elapsed = now - state.lives.lastRegen;
+  const earned = Math.floor(elapsed / LIVE_REGEN_MS);
+  if (earned > 0) {
+    state.lives.count = Math.min(MAX_LIVES, state.lives.count + earned);
+    if (state.lives.count >= MAX_LIVES) {
+      state.lives.lastRegen = null;
+    } else {
+      // Carry over remainder so partial progress isn't lost
+      state.lives.lastRegen = state.lives.lastRegen + earned * LIVE_REGEN_MS;
+    }
+    saveProgress();
+  }
+}
+
+// Milliseconds until the next heart regenerates (0 if full)
+function msUntilNextLife() {
+  if (state.lives.count >= MAX_LIVES || !state.lives.lastRegen) return 0;
+  const elapsed = Date.now() - state.lives.lastRegen;
+  return Math.max(0, LIVE_REGEN_MS - (elapsed % LIVE_REGEN_MS));
+}
+
+function formatTime(ms) {
+  const total = Math.ceil(ms / 1000);
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function spendLife() {
+  updateLives();
+  if (state.lives.count > 0) {
+    if (state.lives.count === MAX_LIVES) {
+      // Was full — start the regen clock now
+      state.lives.lastRegen = Date.now();
+    }
+    state.lives.count--;
+    saveProgress();
+    return true;
+  }
+  return false;
+}
+
+function addLife(n = 1) {
+  updateLives();
+  state.lives.count = Math.min(MAX_LIVES, state.lives.count + n);
+  saveProgress();
+}
+
+function refillLives() {
+  state.lives.count = MAX_LIVES;
+  state.lives.lastRegen = null;
+  saveProgress();
+}
+
+function hasLives() {
+  updateLives();
+  return state.lives.count > 0;
+}
+
+// Renders the heart display string e.g. "❤️❤️❤️🤍🤍"
+function livesDisplay() {
+  updateLives();
+  let s = '';
+  for (let i = 0; i < MAX_LIVES; i++) {
+    s += i < state.lives.count ? '❤️' : '🤍';
+  }
+  return s;
+}
+
+// Update the home-screen hearts pill (hearts + regen countdown)
+function updateLivesDisplay() {
+  const el = document.getElementById('home-lives');
+  if (!el) return;
+  updateLives();
+  if (state.lives.count >= MAX_LIVES) {
+    el.textContent = livesDisplay() + ' Full';
+  } else {
+    el.textContent = livesDisplay() + ' ' + formatTime(msUntilNextLife());
+  }
+}
+
+// Tick the lives timer once per second while on the home screen
+setInterval(() => {
+  if (document.getElementById('screen-home')?.classList.contains('active')) {
+    updateLivesDisplay();
+  }
+}, 1000);
+
+// Show the "out of lives" modal with wait / ad / buy options
+function showOutOfLivesModal() {
+  updateLives();
+  const waitTime = formatTime(msUntilNextLife());
+  showModal({
+    title: 'Out of Lives',
+    sub: `Next life in ${waitTime}`,
+    stars: 0,
+    extra: `<div style="font-size:13px;color:var(--caramel-dark);margin:8px 0;">Refill all 5 lives or wait for them to regenerate.</div>`,
+    actions: [
+      { label: 'Wait', cls: 'btn-secondary btn-small', onClick: () => { hideModal(); renderHome(); }},
+      { label: 'Refill 🪙 200', onClick: () => {
+        if (state.coins < 200) {
+          SFX.invalidMove();
+          showModal({
+            title: 'Not Enough Coins',
+            sub: `You need ${200 - state.coins} more 🪙`,
+            stars: 0, extra: '',
+            actions: [{ label: 'OK', onClick: () => { hideModal(); renderHome(); } }],
+          });
+          return;
+        }
+        state.coins -= 200;
+        refillLives();
+        SFX.coin();
+        hideModal();
+        renderHome();
+      }},
+    ],
+  });
+}
+
+// ===== MILESTONE REWARDS =====
+// Every 10 levels (10, 20, 30...) the player earns a bigger reward.
+const MILESTONE_REWARD = { coins: 300, boosters: 2 };
+
+function checkMilestone(levelIdx) {
+  // levelIdx is 0-based; milestones at index 9, 19, 29 ... (levels 10, 20, 30)
+  if ((levelIdx + 1) % 10 !== 0) return false;
+  if (state.milestonesClaimed[levelIdx]) return false;
+  state.milestonesClaimed[levelIdx] = true;
+  state.coins += MILESTONE_REWARD.coins;
+  ['hammer', 'swap', 'bomb'].forEach(t => {
+    state.ownedBoosters[t] = (state.ownedBoosters[t] || 0) + MILESTONE_REWARD.boosters;
+  });
+  saveProgress();
+  return true;
+}
+
+// ===== DAILY REWARD SYSTEM =====
+// 7-day login calendar. Streak resets if a day is skipped, loops after day 7.
+const DAILY_REWARDS = [
+  { coins: 50,  icon: '🪙', label: '50' },
+  { coins: 75,  icon: '🪙', label: '75' },
+  { coins: 100, icon: '🪙', label: '100' },
+  { coins: 150, icon: '💰', label: '150' },
+  { coins: 200, icon: '💰', label: '200' },
+  { coins: 300, icon: '💎', label: '300' },
+  { coins: 500, icon: '🎁', label: '500 + booster', booster: true },
+];
+
+// Returns an integer day number (days since epoch) for "today"
+function todayNumber() {
+  return Math.floor(Date.now() / 86400000);
+}
+
+// Should the daily reward be shown? (not yet claimed today)
+function isDailyRewardAvailable() {
+  return state.daily.lastClaimDay !== todayNumber();
+}
+
+// Determine which streak day the player is on (0-indexed into DAILY_REWARDS)
+function currentDailyIndex() {
+  const today = todayNumber();
+  const last = state.daily.lastClaimDay;
+  if (last === null) return 0;  // never claimed → day 1
+  if (last === today - 1) {
+    // Consecutive day → advance streak
+    return state.daily.streak % 7;
+  }
+  if (last === today) {
+    // Already claimed today → show current (shouldn't reach here normally)
+    return (state.daily.streak - 1 + 7) % 7;
+  }
+  // Skipped one or more days → streak resets
+  return 0;
+}
+
+function maybeShowDailyReward() {
+  if (!isDailyRewardAvailable()) return false;
+  renderDailyReward();
+  document.getElementById('daily-modal').classList.add('active');
+  return true;
+}
+
+function renderDailyReward() {
+  const idx = currentDailyIndex();
+  const grid = document.getElementById('daily-grid');
+  grid.innerHTML = '';
+  DAILY_REWARDS.forEach((reward, i) => {
+    const cell = document.createElement('div');
+    let cls = 'daily-cell';
+    if (i < idx) cls += ' claimed';
+    else if (i === idx) cls += ' today';
+    if (i === 6) cls += ' day7';
+    cell.className = cls;
+    cell.innerHTML = `
+      ${i < idx ? '<div class="daily-check">✅</div>' : ''}
+      <div class="daily-day-label">Day ${i + 1}</div>
+      <div class="daily-reward-icon">${reward.icon}</div>
+      <div class="daily-reward-amount">${reward.label}</div>
+    `;
+    grid.appendChild(cell);
+  });
+  const reward = DAILY_REWARDS[idx];
+  document.getElementById('daily-sub').textContent =
+    `Day ${idx + 1} reward: ${reward.coins} coins${reward.booster ? ' + a bonus booster!' : ''}`;
+  document.getElementById('daily-claim-btn').textContent = `Claim ${reward.coins} 🪙`;
+}
+
+function claimDailyReward() {
+  const idx = currentDailyIndex();
+  const reward = DAILY_REWARDS[idx];
+  const today = todayNumber();
+
+  // Grant the reward
+  state.coins += reward.coins;
+  if (reward.booster) {
+    // Day 7 bonus — give one of a random booster
+    const types = ['hammer', 'swap', 'bomb'];
+    const pick = types[Math.floor(Math.random() * types.length)];
+    state.ownedBoosters[pick] = (state.ownedBoosters[pick] || 0) + 1;
+  }
+
+  // Update streak
+  if (state.daily.lastClaimDay === today - 1) {
+    state.daily.streak = state.daily.streak + 1;
+  } else {
+    state.daily.streak = 1;  // reset or first claim
+  }
+  state.daily.lastClaimDay = today;
+  saveProgress();
+
+  SFX.coin();
+  if (reward.booster) setTimeout(() => SFX.newTreat(), 300);
+
+  document.getElementById('daily-modal').classList.remove('active');
+  renderHome();
+
+  // Show a confirmation
+  showModal({
+    title: 'Reward Claimed! 🎉',
+    sub: reward.booster
+      ? `+${reward.coins} coins and a bonus booster!`
+      : `+${reward.coins} coins added!`,
+    stars: 0,
+    extra: `<div style="font-weight:800;color:var(--caramel-dark);margin:8px 0;">🪙 Balance: ${state.coins}</div>`,
+    actions: [{ label: 'Sweet!', onClick: hideModal }],
+  });
+}
+
+// ===== SHOP =====
+// Coin costs for buying boosters with in-game currency (the main coin sink)
+const BOOSTER_COSTS = { hammer: 150, swap: 200, bomb: 250 };
+const BOOSTER_INFO = {
+  hammer: { name: 'Hammer', icon: '🔨', desc: 'Smash any single treat' },
+  swap: { name: 'Swap', icon: '🔄', desc: 'Swap any two treats' },
+  bomb: { name: 'Bomb', icon: '💣', desc: 'Blow up a 3×3 area' },
+};
+// Simple SVG icons for shop products
+const SHOP_ICONS = {
+  'coin-small': `<svg viewBox="0 0 60 60"><circle cx="30" cy="34" r="18" fill="#ffb800" stroke="#c98a00" stroke-width="2"/><circle cx="30" cy="34" r="12" fill="#ffd24a"/><text x="30" y="40" font-size="14" text-anchor="middle" fill="#c98a00" font-weight="bold">$</text></svg>`,
+  'coin-medium': `<svg viewBox="0 0 60 60"><circle cx="22" cy="38" r="15" fill="#ffb800" stroke="#c98a00" stroke-width="2"/><circle cx="38" cy="38" r="15" fill="#ffb800" stroke="#c98a00" stroke-width="2"/><circle cx="30" cy="26" r="16" fill="#ffd24a" stroke="#c98a00" stroke-width="2"/><text x="30" y="32" font-size="14" text-anchor="middle" fill="#c98a00" font-weight="bold">$</text></svg>`,
+  'coin-large': `<svg viewBox="0 0 60 60"><path d="M 12 30 L 48 30 L 44 50 L 16 50 Z" fill="#c47a3a" stroke="#7a3f12" stroke-width="2"/><path d="M 12 30 Q 30 22 48 30 L 48 34 Q 30 26 12 34 Z" fill="#8a5028"/><circle cx="24" cy="24" r="9" fill="#ffd24a" stroke="#c98a00" stroke-width="1.5"/><circle cx="36" cy="22" r="9" fill="#ffb800" stroke="#c98a00" stroke-width="1.5"/><circle cx="30" cy="28" r="9" fill="#ffd24a" stroke="#c98a00" stroke-width="1.5"/></svg>`,
+  'coin-mega': `<svg viewBox="0 0 60 60"><path d="M 8 32 L 52 32 L 47 52 L 13 52 Z" fill="#b06fd9" stroke="#5e3a80" stroke-width="2"/><path d="M 8 32 Q 30 24 52 32 L 52 36 Q 30 28 8 36 Z" fill="#7e4aa8"/><circle cx="20" cy="22" r="8" fill="#ffd24a" stroke="#c98a00" stroke-width="1.5"/><circle cx="40" cy="20" r="8" fill="#ffb800" stroke="#c98a00" stroke-width="1.5"/><circle cx="30" cy="16" r="8" fill="#ffd24a" stroke="#c98a00" stroke-width="1.5"/><circle cx="30" cy="26" r="8" fill="#ffb800" stroke="#c98a00" stroke-width="1.5"/><path d="M 30 6 l 2 5 l 5 0 l -4 3 l 2 5 l -5 -3 l -5 3 l 2 -5 l -4 -3 l 5 0 Z" fill="#fff" opacity="0.9"/></svg>`,
+  'no-ads': `<svg viewBox="0 0 60 60"><rect x="12" y="18" width="36" height="26" rx="4" fill="#6a7fc8" stroke="#3d4f8c" stroke-width="2"/><text x="30" y="36" font-size="11" text-anchor="middle" fill="#fff" font-weight="bold">ADS</text><line x1="14" y1="16" x2="46" y2="46" stroke="#d94569" stroke-width="5" stroke-linecap="round"/></svg>`,
+  'starter': `<svg viewBox="0 0 60 60"><rect x="12" y="24" width="36" height="26" rx="4" fill="#ee6a8e" stroke="#b03a5e" stroke-width="2"/><rect x="12" y="24" width="36" height="9" fill="#ff8aab"/><path d="M 30 24 L 30 50" stroke="#b03a5e" stroke-width="2"/><path d="M 30 24 Q 22 14 16 20 Q 22 24 30 24 Q 38 24 44 20 Q 38 14 30 24 Z" fill="#ffd24a" stroke="#c98a00" stroke-width="1.5"/></svg>`,
+};
+
+function goToShop(returnTo) {
+  state.shopReturnTo = returnTo || 'home';
+  renderShop();
+  show('screen-shop');
+  window.scrollTo(0, 0);
+}
+
+function renderShop() {
+  const coinCount = document.getElementById('shop-coin-count');
+  if (coinCount) coinCount.textContent = state.coins;
+  const container = document.getElementById('shop-content');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // Booster shop only — spend coins earned from gameplay
+  const boosterLabel = document.createElement('div');
+  boosterLabel.className = 'shop-section-label';
+  boosterLabel.textContent = '🧰 Boosters';
+  container.appendChild(boosterLabel);
+  ['hammer', 'swap', 'bomb'].forEach(type => {
+    const info = BOOSTER_INFO[type];
+    const cost = BOOSTER_COSTS[type];
+    const owned = state.ownedBoosters[type] || 0;
+    const item = document.createElement('div');
+    item.className = 'shop-item';
+    item.innerHTML = `
+      <div class="shop-item-icon" style="font-size:32px;">${info.icon}</div>
+      <div class="shop-item-info">
+        <div class="shop-item-title">${info.name} <span style="font-size:12px;color:var(--caramel);">(have ${owned})</span></div>
+        <div class="shop-item-desc">${info.desc}</div>
+      </div>
+      <div class="shop-item-price">🪙 ${cost}</div>
+    `;
+    item.onclick = () => buyBoosterWithCoins(type);
+    container.appendChild(item);
+  });
+}
+
+function buyBoosterWithCoins(type) {
+  const cost = BOOSTER_COSTS[type];
+  const info = BOOSTER_INFO[type];
+  if (state.coins < cost) {
+    SFX.invalidMove();
+    showModal({
+      title: 'Not Enough Coins',
+      sub: `You need ${cost - state.coins} more 🪙 to buy a ${info.name}.`,
+      stars: 0, extra: '',
+      actions: [
+        { label: 'OK', onClick: () => { hideModal(); renderShop(); } },
+      ],
+    });
+    return;
+  }
+  state.coins -= cost;
+  state.ownedBoosters[type] = (state.ownedBoosters[type] || 0) + 1;
+  saveProgress();
+  SFX.booster();
+  renderShop();
+  renderHome();
+}
+
+function buildShopItem(product, featured) {
+  const owned = product.type === 'non_consumable' && IAPManager.isOwned(product.id);
+  const item = document.createElement('div');
+  item.className = 'shop-item' + (featured ? ' featured' : '') + (owned ? ' owned' : '');
+
+  let detailLine = '';
+  if (product.coins > 0 && product.bonusBoosters) {
+    detailLine = `${product.coins.toLocaleString()} coins + ${product.bonusBoosters}× each booster`;
+  } else if (product.coins > 0) {
+    detailLine = `${product.coins.toLocaleString()} coins`;
+  }
+
+  const badgeClass = product.badge === 'BEST VALUE' ? 'value'
+    : product.badge === 'LIMITED' ? 'limited' : '';
+
+  item.innerHTML = `
+    ${product.badge && !owned ? `<div class="shop-badge ${badgeClass}">${product.badge}</div>` : ''}
+    <div class="shop-item-icon">${SHOP_ICONS[product.icon] || ''}</div>
+    <div class="shop-item-info">
+      <div class="shop-item-title">${product.title}</div>
+      ${detailLine ? `<div class="shop-item-detail">${detailLine}</div>` : ''}
+      ${product.description ? `<div class="shop-item-desc">${product.description}</div>` : ''}
+    </div>
+    <div class="shop-item-price">${owned ? 'OWNED' : product.price}</div>
+  `;
+
+  if (!owned) {
+    item.onclick = () => {
+      SFX.buttonTap();
+      IAPManager.purchase(product.id,
+        (p) => { onPurchaseSuccess(p); },
+        () => { /* cancelled — do nothing */ }
+      );
+    };
+  }
+  return item;
+}
+
+function onPurchaseSuccess(product) {
+  SFX.coin();
+  let msg = '';
+  if (product.coins > 0 && product.bonusBoosters) {
+    msg = `${product.coins.toLocaleString()} coins and ${product.bonusBoosters}× each booster added!`;
+  } else if (product.coins > 0) {
+    msg = `${product.coins.toLocaleString()} coins added to your account!`;
+  } else if (product.id === 'remove_ads') {
+    msg = 'Ads removed! Enjoy uninterrupted baking.';
+  }
+  showModal({
+    title: 'Thank You! 🎉',
+    sub: msg,
+    stars: 0,
+    extra: `<div style="font-weight:800;color:var(--caramel-dark);margin:8px 0;">🪙 Balance: ${state.coins}</div>`,
+    actions: [{ label: 'Sweet!', onClick: () => { hideModal(); renderShop(); } }],
+  });
+}
+
+// ===== FAKE PURCHASE SHEET =====
+function showFakePurchaseSheet(product) {
+  document.getElementById('purchase-item-title').textContent = product.title;
+  document.getElementById('purchase-item-price').textContent = product.price;
+  const iconEl = document.getElementById('purchase-item-icon');
+  // Use a simple emoji in the purchase sheet
+  const emojiMap = {
+    'coins_small': '🪙', 'coins_medium': '🪙', 'coins_large': '💰',
+    'coins_mega': '💎', 'remove_ads': '🚫', 'starter_pack': '🎁'
+  };
+  iconEl.textContent = emojiMap[product.id] || '🪙';
+  document.getElementById('purchase-buy-btn').textContent = `Buy  ${product.price}`;
+  document.getElementById('purchase-sheet').classList.add('active');
+}
+
+function confirmFakePurchase() {
+  document.getElementById('purchase-sheet').classList.remove('active');
+  IAPManager._completePurchase();
+}
+
+function cancelFakePurchase() {
+  document.getElementById('purchase-sheet').classList.remove('active');
+  IAPManager._cancelPurchase();
+}
+
+function restorePurchases() {
+  SFX.buttonTap();
+  IAPManager.restorePurchases((count) => {
+    showModal({
+      title: 'Restore Complete',
+      sub: count > 0
+        ? `Restored ${count} previous purchase${count > 1 ? 's' : ''}.`
+        : 'No previous purchases found.',
+      stars: 0, extra: '',
+      actions: [{ label: 'OK', onClick: () => { hideModal(); renderShop(); } }],
+    });
+  });
+}
+function dismissCover() {
+  SFX.init();  // First user interaction — unlock audio context
+  SFX.buttonTap();
+  goToHome();
+  // Auto-show tutorial the very first time a player dismisses the cover
+  if (Object.keys(state.progress).length === 0) {
+    setTimeout(() => showHowToPlay(), 350);
+  } else {
+    // Returning player — check for daily reward
+    setTimeout(() => maybeShowDailyReward(), 400);
+  }
+}
+function startLevel(idx) {
+  // Lives gate — can't start a level without a life
+  if (!hasLives()) {
+    showOutOfLivesModal();
+    return;
+  }
+  hideModal();
+  state.currentLevel = idx;
+  state.lifeSpentThisLevel = false;  // track so we only spend on fail
+  show('screen-game');
+  setTimeout(() => initLevel(idx), 20);
+}
+function quitLevel() {
+  // Use our own modal instead of native confirm — more reliable on mobile
+  showModal({
+    title: 'Quit Level?',
+    sub: 'Your progress on this level will be lost.',
+    stars: 0,
+    extra: '',
+    actions: [
+      { label: 'Keep Playing', cls: 'btn-secondary btn-small', onClick: hideModal },
+      { label: 'Quit', onClick: () => { hideModal(); state.gameOver = true; goToMap(); }}
+    ]
+  });
+}
+function resetProgress() {
+  showModal({
+    title: 'Reset Progress?',
+    sub: 'This deletes all level progress, coins, and unlocked treats. Cannot be undone.',
+    stars: 0,
+    extra: '',
+    actions: [
+      { label: 'Cancel', cls: 'btn-secondary btn-small', onClick: hideModal },
+      { label: 'Reset', onClick: () => {
+        state.progress = {};
+        state.coins = 500;
+        state.ownedBoosters = { hammer: 3, swap: 3, bomb: 3 };
+        state.daily = { lastClaimDay: null, streak: 0 };
+        clearSave();
+        hideModal();
+        renderHome();
+      }}
+    ]
+  });
+}
+
+// Calculate how many bakery items are unlocked given completed levels
+function getUnlockedItemCount(completed) {
+  if (completed === 0) return 0;
+  return Math.min(BAKERY_ITEMS.length, Math.ceil(completed * BAKERY_ITEMS.length / LEVELS.length));
+}
+
+function renderHome() {
+  const coinEl = document.getElementById('home-coins');
+  if (coinEl) coinEl.textContent = state.coins;
+  updateLivesDisplay();
+  const shelf = document.getElementById('bakery-shelf');
+  shelf.innerHTML = '';
+  const total = LEVELS.length;
+  const completed = Object.values(state.progress).filter(p => p.completed).length;
+  const unlocked = getUnlockedItemCount(completed);
+  BAKERY_ITEMS.forEach((e, i) => {
+    const d = document.createElement('div');
+    d.className = 'shelf-item' + (i < unlocked ? ' unlocked' : '');
+    d.textContent = e;
+    shelf.appendChild(d);
+  });
+  const subtitleEl = document.getElementById('bakery-subtitle');
+  if (subtitleEl) subtitleEl.textContent = `${unlocked} / ${BAKERY_ITEMS.length} treats unlocked`;
+  document.getElementById('bakery-progress').style.width = (completed / total * 100) + '%';
+  document.getElementById('bakery-progress-text').textContent = `${completed} / ${total} levels complete`;
+  updateSoundButton();
+}
+
+function renderMap() {
+  const grid = document.getElementById('level-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  let highest = -1;
+  Object.keys(state.progress).forEach(k => {
+    const i = parseInt(k);
+    if (state.progress[k].completed && i > highest) highest = i;
+  });
+  const maxUnlocked = highest + 1;
+  LEVELS.forEach((lvl, i) => {
+    const node = document.createElement('div');
+    node.dataset.levelIdx = i;
+    const completed = state.progress[i]?.completed;
+    if (completed) {
+      node.className = 'level-node completed';
+      const stars = state.progress[i].stars || 1;
+      node.innerHTML = (i + 1) + `<div class="stars">${'⭐'.repeat(stars)}</div>`;
+    } else if (i <= maxUnlocked) {
+      node.className = 'level-node unlocked';
+      node.textContent = i + 1;
+    } else {
+      node.className = 'level-node locked';
+      node.textContent = '🔒';
+    }
+    grid.appendChild(node);
+  });
+  // Event delegation for reliable click handling
+  grid.onclick = function(e) {
+    const node = e.target.closest('.level-node');
+    if (!node || node.classList.contains('locked')) return;
+    const idx = parseInt(node.dataset.levelIdx);
+    startLevel(idx);
+  };
+}
+
+function initLevel(idx) {
+  const lvl = LEVELS[idx];
+  state.level = lvl;
+  state.rows = lvl.rows;
+  state.cols = lvl.cols;
+  state.colors = lvl.colors;
+  state.movesLeft = lvl.moves;
+  state.score = 0;
+  state.collected = {};
+  state.selectedCell = null;
+  state.busy = false;
+  state.gameOver = false;
+  state.activeBooster = null;
+  state.swapBoosterFirst = null;
+  state.colorBombArmed = null;
+  state.continueUsed = false;
+  // Copy the player's persistent booster inventory into this level
+  state.boosters = {
+    hammer: state.ownedBoosters.hammer || 0,
+    swap: state.ownedBoosters.swap || 0,
+    bomb: state.ownedBoosters.bomb || 0,
+  };
+  hideBoosterHint();
+
+  let attempts = 0;
+  do {
+    state.grid = [];
+    for (let r = 0; r < state.rows; r++) {
+      const row = [];
+      for (let c = 0; c < state.cols; c++) row.push(randomTile(r, c, row, state.grid));
+      state.grid.push(row);
+    }
+    attempts++;
+  } while ((findMatches().length > 0 || !hasValidMove()) && attempts < 50);
+
+  state.jellyGrid = [];
+  for (let r = 0; r < state.rows; r++) state.jellyGrid.push(new Array(state.cols).fill(0));
+  if (lvl.type === 'jelly') {
+    const layers = lvl.jellyLayers || 1;
+    const cells = [];
+    for (let r = 0; r < state.rows; r++) for (let c = 0; c < state.cols; c++) cells.push([r, c]);
+    shuffle(cells);
+    let placed = 0;
+    for (const [r, c] of cells) {
+      if (placed >= lvl.jellyCount) break;
+      state.jellyGrid[r][c] = layers;
+      placed++;
+    }
+    state.jellyLeft = placed;
+  }
+  renderBoard();
+  updateHUD();
+  renderObjective();
+}
+
+function randomTile(r, c, row, grid) {
+  const av = TYPES.slice(0, state.colors);
+  for (let i = 0; i < 20; i++) {
+    const t = av[Math.floor(Math.random() * av.length)];
+    if (c >= 2 && row[c-1]?.type === t && row[c-2]?.type === t) continue;
+    if (r >= 2 && grid[r-1]?.[c]?.type === t && grid[r-2]?.[c]?.type === t) continue;
+    return { type: t, special: null };
+  }
+  return { type: av[0], special: null };
+}
+
+function renderBoard() {
+  const board = document.getElementById('board');
+  const vw = Math.max(window.innerWidth, document.documentElement.clientWidth);
+  const vh = Math.max(window.innerHeight, document.documentElement.clientHeight);
+  
+  // Calculate cell size to fit BOTH width and height
+  // Reserve space for: screen padding (~50px), HUD (~60px), objective (~45px),
+  // board container padding (~20px), booster bar (~55px)
+  const reservedHeight = 230; // total vertical space taken by non-board elements
+  const availableHeight = vh - reservedHeight;
+  const availableWidth = Math.min(vw - 40, 660);
+  
+  // Pick the smaller of width-based and height-based cell sizes
+  const cellFromWidth = Math.floor(availableWidth / state.cols);
+  const cellFromHeight = Math.floor(availableHeight / state.rows);
+  const cellSize = Math.max(24, Math.min(cellFromWidth, cellFromHeight, 56));
+  
+  board.style.gridTemplateColumns = `repeat(${state.cols}, ${cellSize}px)`;
+  board.style.gridTemplateRows = `repeat(${state.rows}, ${cellSize}px)`;
+  board.innerHTML = '';
+  for (let r = 0; r < state.rows; r++) {
+    for (let c = 0; c < state.cols; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      if (state.jellyGrid[r]?.[c] > 0) {
+        cell.classList.add('jelly');
+        if (state.jellyGrid[r][c] >= 2) cell.classList.add('jelly-2');
+      }
+      const tile = state.grid[r][c];
+      if (tile) {
+        const el = document.createElement('div');
+        el.className = `tile t-${tile.type}` + (tile.special === 'colorbomb' ? ' color-bomb' : '');
+        el.innerHTML = tile.special === 'colorbomb' ? TYPE_SVG.colorbomb : TYPE_SVG[tile.type];
+        el.onclick = () => onTileClick(r, c);
+        cell.appendChild(el);
+      }
+      board.appendChild(cell);
+    }
+  }
+}
+
+function updateCellVisual(r, c) {
+  const board = document.getElementById('board');
+  const cells = board.querySelectorAll('.cell');
+  const cell = cells[r * state.cols + c];
+  if (!cell) return;
+  cell.classList.remove('jelly', 'jelly-2');
+  if (state.jellyGrid[r]?.[c] > 0) {
+    cell.classList.add('jelly');
+    if (state.jellyGrid[r][c] >= 2) cell.classList.add('jelly-2');
+  }
+  cell.innerHTML = '';
+  const tile = state.grid[r][c];
+  if (tile) {
+    const el = document.createElement('div');
+    el.className = `tile t-${tile.type}` + (tile.special === 'colorbomb' ? ' color-bomb' : '');
+    el.innerHTML = tile.special === 'colorbomb' ? TYPE_SVG.colorbomb : TYPE_SVG[tile.type];
+    el.onclick = () => onTileClick(r, c);
+    cell.appendChild(el);
+  }
+}
+
+function updateHUD() {
+  document.getElementById('stat-level').textContent = state.currentLevel + 1;
+  document.getElementById('stat-moves').textContent = state.movesLeft;
+  document.getElementById('stat-score').textContent = state.score.toLocaleString();
+  ['hammer', 'swap', 'bomb'].forEach(b => {
+    const el = document.getElementById('count-' + b);
+    if (el) {
+      el.textContent = state.boosters[b];
+      el.classList.toggle('zero', state.boosters[b] === 0);
+    }
+    const btn = document.getElementById('booster-' + b);
+    if (btn) {
+      btn.disabled = state.boosters[b] === 0;
+      btn.classList.toggle('active-booster', state.activeBooster === b);
+    }
+  });
+}
+
+function renderObjective() {
+  const lvl = state.level;
+  const banner = document.getElementById('objective-banner');
+  let html = '';
+  if (lvl.type === 'score') html = `<span class="obj-icon">⭐</span> Reach <b>${lvl.target.toLocaleString()}</b> points`;
+  else if (lvl.type === 'jelly') html = `<span class="obj-icon">🟦</span> Clear all jelly (<b>${state.jellyLeft}</b> left)`;
+  else if (lvl.type === 'collect') {
+    const parts = Object.entries(lvl.collectTarget).map(([t, tgt]) => {
+      const got = state.collected[t] || 0;
+      // Render the actual tile SVG inline at small size so the objective
+      // shows exactly what's on the board
+      return `<span class="obj-mini-tile">${TYPE_SVG[t]}</span><b>${Math.max(0, tgt - got)}</b>`;
+    });
+    html = `<span class="obj-icon">📦</span> Collect: ${parts.join(' &nbsp; ')}`;
+  }
+  banner.innerHTML = html;
+}
+
+function onTileClick(r, c) {
+  if (state.busy || state.gameOver) return;
+  // If a booster is active, handle it instead of normal swap
+  if (state.activeBooster) {
+    handleBoosterTileClick(r, c);
+    return;
+  }
+  const tile = state.grid[r]?.[c];
+
+  // Color bomb mode: a bomb has been tapped and is waiting for a color choice
+  if (state.colorBombArmed) {
+    const [br, bc] = state.colorBombArmed;
+    // Tap the bomb again to cancel
+    if (br === r && bc === c) {
+      state.colorBombArmed = null;
+      hideBoosterHint();
+      const cells = document.getElementById('board').querySelectorAll('.cell');
+      cells[br * state.cols + bc]?.querySelector('.tile')?.classList.remove('selected');
+      return;
+    }
+    // BOMB + BOMB COMBO: tapping a second color bomb clears the entire board
+    if (tile && tile.special === 'colorbomb') {
+      state.busy = true;
+      state.colorBombArmed = null;
+      hideBoosterHint();
+      const cells = document.getElementById('board').querySelectorAll('.cell');
+      cells[br * state.cols + bc]?.querySelector('.tile')?.classList.remove('selected');
+      state.movesLeft--;
+      updateHUD();
+      SFX.colorBomb();
+      setTimeout(() => SFX.colorBomb(), 150);  // double whoosh for double bomb
+      // Clear the OTHER bomb tile so activateColorBomb's "clear all" doesn't
+      // try to special-handle it. Pass null to activate clear-everything mode.
+      state.grid[r][c] = null;
+      activateColorBomb(br, bc, null).then(() => {
+        state.busy = false;
+        checkGameEnd();
+      });
+      return;
+    }
+    // Must tap a normal tile to pick a color
+    if (!tile || tile.special) {
+      return;
+    }
+    state.busy = true;
+    state.colorBombArmed = null;
+    hideBoosterHint();
+    const cells = document.getElementById('board').querySelectorAll('.cell');
+    cells[br * state.cols + bc]?.querySelector('.tile')?.classList.remove('selected');
+    state.movesLeft--;
+    updateHUD();
+    SFX.colorBomb();
+    activateColorBomb(br, bc, tile.type).then(() => {
+      state.busy = false;
+      checkGameEnd();
+    });
+    return;
+  }
+
+  // Tap a color bomb to ARM it — next tap will pick the target color
+  if (tile && tile.special === 'colorbomb' && !state.selectedCell) {
+    state.colorBombArmed = [r, c];
+    const cells = document.getElementById('board').querySelectorAll('.cell');
+    cells[r * state.cols + c]?.querySelector('.tile')?.classList.add('selected');
+    showBoosterHint('✨ Tap any treat to clear all of that kind!');
+    SFX.tileSelect();
+    return;
+  }
+
+  if (!state.selectedCell) { selectCell(r, c); return; }
+  const [sr, sc] = state.selectedCell;
+  if (sr === r && sc === c) { deselectCell(); return; }
+  if (Math.abs(sr - r) + Math.abs(sc - c) === 1) attemptSwap(sr, sc, r, c);
+  else { deselectCell(); selectCell(r, c); }
+}
+
+function selectCell(r, c) {
+  state.selectedCell = [r, c];
+  SFX.tileSelect();
+  const cells = document.getElementById('board').querySelectorAll('.cell');
+  cells[r * state.cols + c]?.querySelector('.tile')?.classList.add('selected');
+}
+
+function deselectCell() {
+  if (!state.selectedCell) return;
+  const [r, c] = state.selectedCell;
+  const cells = document.getElementById('board').querySelectorAll('.cell');
+  cells[r * state.cols + c]?.querySelector('.tile')?.classList.remove('selected');
+  state.selectedCell = null;
+}
+
+// ===== BOOSTERS =====
+function activateBooster(type) {
+  if (state.busy || state.gameOver) return;
+  if (state.boosters[type] <= 0) return;
+  // Toggle off if already active
+  if (state.activeBooster === type) {
+    cancelBooster();
+    return;
+  }
+  deselectCell();
+  state.activeBooster = type;
+  state.swapBoosterFirst = null;
+  SFX.booster();
+  const hints = {
+    hammer: '🔨 Tap a treat to smash it',
+    swap: '🔄 Tap two treats to swap them (any direction)',
+    bomb: '💣 Tap a treat to blow up a 3×3 area'
+  };
+  showBoosterHint(hints[type]);
+  updateHUD();
+}
+
+function cancelBooster() {
+  state.activeBooster = null;
+  state.swapBoosterFirst = null;
+  hideBoosterHint();
+  // Remove any booster-target highlight
+  document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
+  updateHUD();
+}
+
+function showBoosterHint(msg) {
+  const hint = document.getElementById('booster-hint');
+  hint.textContent = msg;
+  hint.style.display = 'block';
+}
+function hideBoosterHint() {
+  const hint = document.getElementById('booster-hint');
+  if (hint) hint.style.display = 'none';
+}
+
+async function handleBoosterTileClick(r, c) {
+  const type = state.activeBooster;
+  if (type === 'hammer') {
+    state.busy = true;
+    state.boosters.hammer--;
+    state.activeBooster = null;
+    hideBoosterHint();
+    SFX.hammerHit();
+    await clearTiles([[r, c]]);
+    state.busy = false;
+    updateHUD();
+    checkGameEnd();
+  } else if (type === 'bomb') {
+    state.busy = true;
+    state.boosters.bomb--;
+    state.activeBooster = null;
+    hideBoosterHint();
+    SFX.bombHit();
+    const toClear = [];
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        const nr = r + dr, nc = c + dc;
+        if (nr >= 0 && nr < state.rows && nc >= 0 && nc < state.cols) toClear.push([nr, nc]);
+      }
+    }
+    await clearTiles(toClear);
+    state.busy = false;
+    updateHUD();
+    checkGameEnd();
+  } else if (type === 'swap') {
+    if (!state.swapBoosterFirst) {
+      state.swapBoosterFirst = [r, c];
+      SFX.tileSelect();
+      const cells = document.getElementById('board').querySelectorAll('.cell');
+      cells[r * state.cols + c]?.querySelector('.tile')?.classList.add('selected');
+      showBoosterHint('🔄 Now tap a second treat');
+    } else {
+      const [r1, c1] = state.swapBoosterFirst;
+      if (r1 === r && c1 === c) {
+        // Tap same tile = cancel
+        cancelBooster();
+        return;
+      }
+      state.busy = true;
+      state.boosters.swap--;
+      state.activeBooster = null;
+      state.swapBoosterFirst = null;
+      hideBoosterHint();
+      SFX.swapWhoosh();
+      // Force swap (doesn't require match)
+      const t1 = state.grid[r1][c1], t2 = state.grid[r][c];
+      state.grid[r1][c1] = t2;
+      state.grid[r][c] = t1;
+      updateCellVisual(r1, c1);
+      updateCellVisual(r, c);
+      await sleep(200);
+      state.chainLevel = 0;
+      const matches = findMatches();
+      if (matches.length > 0) await resolveMatches();
+      else await cascadeFill(); // still settle
+      state.busy = false;
+      updateHUD();
+      checkGameEnd();
+    }
+  }
+}
+
+async function clearTiles(positions) {
+  const board = document.getElementById('board');
+  const cells = board.querySelectorAll('.cell');
+  positions.forEach(([r, c]) => {
+    const cell = cells[r * state.cols + c];
+    cell?.querySelector('.tile')?.classList.add('matching');
+    const t = state.grid[r][c];
+    if (t) {
+      addScore(50, cell);
+      if (t.type) state.collected[t.type] = (state.collected[t.type] || 0) + 1;
+    }
+    if (state.jellyGrid[r][c] > 0) {
+      state.jellyGrid[r][c]--;
+      if (state.jellyGrid[r][c] === 0) state.jellyLeft--;
+    }
+  });
+  await sleep(300);
+  positions.forEach(([r, c]) => { state.grid[r][c] = null; });
+  for (let r = 0; r < state.rows; r++)
+    for (let c = 0; c < state.cols; c++) updateCellVisual(r, c);
+  renderObjective();
+  await sleep(80);
+  await cascadeFill();
+}
+
+async function attemptSwap(r1, c1, r2, c2) {
+  state.busy = true;
+  deselectCell();
+  SFX.tileSwap();
+  const t1 = state.grid[r1][c1], t2 = state.grid[r2][c2];
+  state.grid[r1][c1] = t2;
+  state.grid[r2][c2] = t1;
+  updateCellVisual(r1, c1);
+  updateCellVisual(r2, c2);
+
+  let triggered = false;
+  if (t1.special === 'colorbomb' || t2.special === 'colorbomb') {
+    const bombAt = t1.special === 'colorbomb' ? [r1, c1] : [r2, c2];
+    const other = t1.special === 'colorbomb' ? t2 : t1;
+    const tgt = other.special === 'colorbomb' ? null : other.type;
+    state.movesLeft--;
+    updateHUD();
+    SFX.colorBomb();
+    await activateColorBomb(bombAt[0], bombAt[1], tgt);
+    triggered = true;
+    state.busy = false;
+    checkGameEnd();
+    return;
+  }
+
+  await sleep(180);
+  const matches = findMatches();
+  if (matches.length === 0) {
+    SFX.invalidMove();
+    state.grid[r1][c1] = t1;
+    state.grid[r2][c2] = t2;
+    updateCellVisual(r1, c1);
+    updateCellVisual(r2, c2);
+    state.busy = false;
+    return;
+  }
+  state.movesLeft--;
+  updateHUD();
+  state.chainLevel = 0;
+  await resolveMatches(matches);
+  state.busy = false;
+  checkGameEnd();
+}
+
+function findMatches() {
+  const marked = Array(state.rows).fill(null).map(() => new Array(state.cols).fill(false));
+  for (let r = 0; r < state.rows; r++) {
+    let run = 1;
+    for (let c = 1; c <= state.cols; c++) {
+      const same = c < state.cols && state.grid[r][c] && state.grid[r][c-1] &&
+                   state.grid[r][c].type === state.grid[r][c-1].type &&
+                   !state.grid[r][c].special && !state.grid[r][c-1].special;
+      if (same) run++;
+      else { if (run >= 3) for (let k = c - run; k < c; k++) marked[r][k] = true; run = 1; }
+    }
+  }
+  for (let c = 0; c < state.cols; c++) {
+    let run = 1;
+    for (let r = 1; r <= state.rows; r++) {
+      const same = r < state.rows && state.grid[r][c] && state.grid[r-1][c] &&
+                   state.grid[r][c].type === state.grid[r-1][c].type &&
+                   !state.grid[r][c].special && !state.grid[r-1][c].special;
+      if (same) run++;
+      else { if (run >= 3) for (let k = r - run; k < r; k++) marked[k][c] = true; run = 1; }
+    }
+  }
+  const out = [];
+  for (let r = 0; r < state.rows; r++)
+    for (let c = 0; c < state.cols; c++)
+      if (marked[r][c]) out.push([r, c]);
+  return out;
+}
+
+function findMatchGroups() {
+  const matches = findMatches();
+  if (matches.length === 0) return [];
+  const set = new Set(matches.map(([r,c]) => r + ',' + c));
+  const visited = new Set();
+  const groups = [];
+  for (const [r, c] of matches) {
+    const key = r + ',' + c;
+    if (visited.has(key)) continue;
+    const type = state.grid[r][c].type;
+    const queue = [[r, c]];
+    const group = [];
+    visited.add(key);
+    while (queue.length) {
+      const [cr, cc] = queue.shift();
+      group.push([cr, cc]);
+      for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+        const nr = cr + dr, nc = cc + dc;
+        const nk = nr + ',' + nc;
+        if (set.has(nk) && !visited.has(nk) && state.grid[nr]?.[nc]?.type === type) {
+          visited.add(nk);
+          queue.push([nr, nc]);
+        }
+      }
+    }
+    groups.push({ type, cells: group });
+  }
+  return groups;
+}
+
+async function resolveMatches() {
+  const groups = findMatchGroups();
+  const toClear = new Set();
+  const bombSpawns = [];
+  for (const group of groups) {
+    if (group.cells.length >= 5) {
+      const spawn = group.cells[Math.floor(group.cells.length / 2)];
+      bombSpawns.push({ pos: spawn, type: group.type });
+      group.cells.forEach(([r, c]) => {
+        if (r !== spawn[0] || c !== spawn[1]) toClear.add(r + ',' + c);
+      });
+    } else {
+      group.cells.forEach(([r, c]) => toClear.add(r + ',' + c));
+    }
+  }
+  // Sound: rising pitch for each cascade level
+  SFX.match(state.chainLevel || 0);
+  if (bombSpawns.length > 0) setTimeout(() => SFX.booster(), 100);
+  // Cascade bonus: each chain level multiplies tile points
+  // Chain 0 (initial match): 50 per tile
+  // Chain 1 (first cascade): 75 per tile
+  // Chain 2: 100 per tile, etc. — rewards big combos
+  const cascadeMultiplier = 1 + 0.5 * (state.chainLevel || 0);
+  const tilePoints = Math.round(50 * cascadeMultiplier);
+  state.chainLevel = (state.chainLevel || 0) + 1;
+  const board = document.getElementById('board');
+  const cells = board.querySelectorAll('.cell');
+  toClear.forEach(key => {
+    const [r, c] = key.split(',').map(Number);
+    const cell = cells[r * state.cols + c];
+    cell?.querySelector('.tile')?.classList.add('matching');
+    const t = state.grid[r][c];
+    if (t) {
+      addScore(tilePoints, cell);
+      if (t.type) state.collected[t.type] = (state.collected[t.type] || 0) + 1;
+    }
+    if (state.jellyGrid[r][c] > 0) {
+      state.jellyGrid[r][c]--;
+      if (state.jellyGrid[r][c] === 0) state.jellyLeft--;
+    }
+  });
+  await sleep(280);
+  toClear.forEach(key => {
+    const [r, c] = key.split(',').map(Number);
+    state.grid[r][c] = null;
+  });
+  bombSpawns.forEach(({ pos, type }) => {
+    state.grid[pos[0]][pos[1]] = { type, special: 'colorbomb' };
+  });
+  for (let r = 0; r < state.rows; r++)
+    for (let c = 0; c < state.cols; c++) updateCellVisual(r, c);
+  renderObjective();
+  updateHUD();
+  await sleep(80);
+  await cascadeFill();
+}
+
+async function cascadeFill() {
+  let didFill = true;
+  let iter = 0;
+  while (didFill && iter < 30) {
+    didFill = false;
+    iter++;
+    for (let c = 0; c < state.cols; c++) {
+      for (let r = state.rows - 1; r >= 0; r--) {
+        if (!state.grid[r][c]) {
+          for (let k = r - 1; k >= 0; k--) {
+            if (state.grid[k][c]) {
+              state.grid[r][c] = state.grid[k][c];
+              state.grid[k][c] = null;
+              didFill = true;
+              break;
+            }
+          }
+        }
+      }
+      for (let r = 0; r < state.rows; r++) {
+        if (!state.grid[r][c]) {
+          const av = TYPES.slice(0, state.colors);
+          state.grid[r][c] = { type: av[Math.floor(Math.random() * av.length)], special: null };
+          didFill = true;
+        }
+      }
+    }
+    for (let r = 0; r < state.rows; r++)
+      for (let c = 0; c < state.cols; c++) updateCellVisual(r, c);
+    await sleep(220);
+    if (findMatches().length > 0) { await resolveMatches(); return; }
+  }
+  if (!hasValidMove()) { await sleep(200); shuffleBoard(); }
+}
+
+async function activateColorBomb(r, c, targetType) {
+  const board = document.getElementById('board');
+  const cells = board.querySelectorAll('.cell');
+  const toClear = [];
+  if (targetType === null) {
+    for (let rr = 0; rr < state.rows; rr++) for (let cc = 0; cc < state.cols; cc++) toClear.push([rr, cc]);
+  } else {
+    for (let rr = 0; rr < state.rows; rr++)
+      for (let cc = 0; cc < state.cols; cc++)
+        if (state.grid[rr][cc]?.type === targetType || (rr === r && cc === c)) toClear.push([rr, cc]);
+  }
+  toClear.forEach(([rr, cc]) => {
+    const cell = cells[rr * state.cols + cc];
+    cell?.querySelector('.tile')?.classList.add('matching');
+    const t = state.grid[rr][cc];
+    if (t) {
+      addScore(80, cell);
+      if (t.type) state.collected[t.type] = (state.collected[t.type] || 0) + 1;
+    }
+    if (state.jellyGrid[rr][cc] > 0) {
+      state.jellyGrid[rr][cc]--;
+      if (state.jellyGrid[rr][cc] === 0) state.jellyLeft--;
+    }
+  });
+  await sleep(350);
+  toClear.forEach(([rr, cc]) => { state.grid[rr][cc] = null; });
+  for (let rr = 0; rr < state.rows; rr++)
+    for (let cc = 0; cc < state.cols; cc++) updateCellVisual(rr, cc);
+  renderObjective();
+  updateHUD();
+  await sleep(80);
+  await cascadeFill();
+}
+
+function hasValidMove() {
+  for (let r = 0; r < state.rows; r++) {
+    for (let c = 0; c < state.cols; c++) {
+      if (!state.grid[r]?.[c]) continue;
+      if (state.grid[r][c].special === 'colorbomb') return true;
+      if (c + 1 < state.cols && state.grid[r][c+1] && swapWouldMatch(r, c, r, c+1)) return true;
+      if (r + 1 < state.rows && state.grid[r+1]?.[c] && swapWouldMatch(r, c, r+1, c)) return true;
+    }
+  }
+  return false;
+}
+
+function swapWouldMatch(r1, c1, r2, c2) {
+  const a = state.grid[r1][c1], b = state.grid[r2][c2];
+  state.grid[r1][c1] = b; state.grid[r2][c2] = a;
+  const m = findMatches().length > 0;
+  state.grid[r1][c1] = a; state.grid[r2][c2] = b;
+  return m;
+}
+
+function shuffleBoard() {
+  for (let attempt = 0; attempt < 30; attempt++) {
+    const tiles = [];
+    for (let r = 0; r < state.rows; r++)
+      for (let c = 0; c < state.cols; c++)
+        if (state.grid[r][c]) tiles.push(state.grid[r][c]);
+    shuffle(tiles);
+    let i = 0;
+    for (let r = 0; r < state.rows; r++)
+      for (let c = 0; c < state.cols; c++)
+        if (state.grid[r][c]) state.grid[r][c] = tiles[i++];
+    if (findMatches().length === 0 && hasValidMove()) break;
+  }
+  for (let r = 0; r < state.rows; r++)
+    for (let c = 0; c < state.cols; c++) updateCellVisual(r, c);
+}
+
+function addScore(points, cellEl) {
+  state.score += points;
+  if (cellEl) {
+    const f = document.createElement('div');
+    f.className = 'float-score';
+    f.textContent = '+' + points;
+    const board = document.getElementById('board');
+    const rect = cellEl.getBoundingClientRect();
+    const br = board.getBoundingClientRect();
+    f.style.left = (rect.left - br.left + rect.width / 2) + 'px';
+    f.style.top = (rect.top - br.top) + 'px';
+    // Append to board-container parent so it doesn't pollute board.children indexing
+    board.parentElement.appendChild(f);
+    setTimeout(() => f.remove(), 800);
+  }
+}
+
+function checkGameEnd() {
+  if (state.gameOver) return;
+  const lvl = state.level;
+  let won = false;
+  if (lvl.type === 'score') won = state.score >= lvl.target;
+  else if (lvl.type === 'jelly') won = state.jellyLeft <= 0;
+  else if (lvl.type === 'collect') won = Object.entries(lvl.collectTarget).every(([t, tg]) => (state.collected[t] || 0) >= tg);
+  if (won) { state.gameOver = true; finishLevel(true); }
+  else if (state.movesLeft <= 0) {
+    // Offer continue first (if not already used and not too close to goal-completion-impossible)
+    if (!state.continueUsed) {
+      state.gameOver = true;  // pause input
+      setTimeout(() => showContinueOffer(), 600);
+    } else {
+      state.gameOver = true;
+      finishLevel(false);
+    }
+  }
+}
+
+function showContinueOffer() {
+  const lvl = state.level;
+  let progressText = '';
+  if (lvl.type === 'score') progressText = `${state.score.toLocaleString()} / ${lvl.target.toLocaleString()} pts`;
+  else if (lvl.type === 'jelly') progressText = `${state.jellyLeft} jelly left`;
+  else if (lvl.type === 'collect') {
+    const parts = Object.entries(lvl.collectTarget).map(([t, tg]) => {
+      const got = state.collected[t] || 0;
+      return `<span class="obj-mini-tile" style="width:18px;height:18px;">${TYPE_SVG[t]}</span>${Math.max(0, tg - got)}`;
+    });
+    progressText = 'Need: ' + parts.join(' &nbsp; ');
+  }
+
+  const extraHTML = `
+    <div class="continue-options">
+      <button class="continue-opt" onclick="buyMoves(10, 100)">
+        <div class="continue-opt-left">
+          <span class="continue-opt-icon">➕</span>
+          <span>+10 Moves</span>
+        </div>
+        <span class="continue-opt-cost">🪙 100</span>
+      </button>
+    </div>
+    <div style="font-size:12px; color:var(--caramel); margin-bottom:8px;">You have 🪙 ${state.coins}</div>
+  `;
+  showModal({
+    title: 'Out of Moves!',
+    sub: progressText,
+    stars: 0,
+    extra: extraHTML,
+    actions: [
+      { label: 'Give Up', cls: 'btn-secondary btn-small', onClick: () => { hideModal(); finishLevel(false); }}
+    ]
+  });
+}
+
+function buyMoves(moves, cost) {
+  if (state.coins < cost) {
+    // Not enough coins → re-show with a small message + offer ad alternative
+    showInsufficientCoinsModal(moves, cost);
+    return;
+  }
+  state.coins -= cost;
+  saveProgress();
+  hideModal();
+  grantMoves(moves);
+}
+
+function showInsufficientCoinsModal(moves, cost) {
+  showModal({
+    title: 'Not Enough Coins',
+    sub: `You need ${cost - state.coins} more 🪙`,
+    stars: 0,
+    extra: `<div style="font-size:13px; color:var(--caramel-dark); margin: 8px 0;">Visit the Sweet Shop to get more coins!</div>`,
+    actions: [
+      { label: 'Give Up', cls: 'btn-secondary btn-small', onClick: () => { hideModal(); finishLevel(false); }},
+      { label: '🪙 Sweet Shop', onClick: () => { hideModal(); goToShop(); }}
+    ]
+  });
+}
+
+function grantMoves(n) {
+  state.movesLeft += n;
+  state.continueUsed = true;
+  state.gameOver = false;
+  updateHUD();
+}
+
+function finishLevel(won) {
+  setTimeout(() => {
+    if (won) {
+      SFX.levelComplete();
+      setTimeout(() => SFX.coin(), 600);
+      let stars = 1;
+      const lvl = state.level;
+      // Stars based on moves remaining (rewards efficiency for ALL level types)
+      const ratio = state.movesLeft / lvl.moves;
+      if (ratio >= 0.3) stars = 3;
+      else if (ratio >= 0.1) stars = 2;
+      // Celebrate — more confetti for more stars
+      launchConfetti(40 + stars * 25);
+      // Award coins (more stars = more coins)
+      const coinReward = stars * 25;
+      state.coins += coinReward;
+
+      // Detect if a new bakery treat was unlocked
+      const completedBefore = Object.values(state.progress).filter(p => p.completed).length;
+      const prev = state.progress[state.currentLevel];
+      const wasAlreadyCompleted = prev?.completed;
+      state.progress[state.currentLevel] = {
+        completed: true,
+        stars: Math.max(stars, prev?.stars || 0)
+      };
+      // Persist any unused boosters back to the player's inventory
+      state.ownedBoosters = {
+        hammer: state.boosters.hammer,
+        swap: state.boosters.swap,
+        bomb: state.boosters.bomb,
+      };
+      saveProgress();
+      const completedAfter = Object.values(state.progress).filter(p => p.completed).length;
+      const unlockedBefore = getUnlockedItemCount(completedBefore);
+      const unlockedAfter = getUnlockedItemCount(completedAfter);
+      const newTreat = (!wasAlreadyCompleted && unlockedAfter > unlockedBefore)
+        ? BAKERY_ITEMS[unlockedAfter - 1]
+        : null;
+
+      let extraHTML = `<div style="margin: 8px 0; font-weight: 800; color: var(--caramel-dark);">+🪙 ${coinReward} (Total: ${state.coins})</div>`;
+      if (newTreat) {
+        setTimeout(() => SFX.newTreat(), 1100);
+        extraHTML += `
+          <div style="background: linear-gradient(180deg, #fff8e8, #ffe8c4); border: 2px solid var(--butter); border-radius: 14px; padding: 12px; margin-top: 10px; animation: unlock 0.6s;">
+            <div style="font-size: 11px; color: var(--caramel); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">New Treat Unlocked!</div>
+            <div style="font-size: 44px; margin: 6px 0;">${newTreat}</div>
+            <div style="font-size: 12px; color: var(--caramel-dark); font-weight: 700;">Added to your bakery 🍰</div>
+          </div>`;
+      }
+
+      // Milestone reward — every 10 levels
+      const gotMilestone = checkMilestone(state.currentLevel);
+      if (gotMilestone) {
+        setTimeout(() => SFX.newTreat(), newTreat ? 1500 : 1100);
+        extraHTML += `
+          <div style="background: linear-gradient(180deg, #e8d4f0, #d8b6e8); border: 2px solid var(--plum-deep); border-radius: 14px; padding: 12px; margin-top: 10px; animation: unlock 0.6s;">
+            <div style="font-size: 11px; color: var(--plum-deep); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">🏆 Milestone Reward!</div>
+            <div style="font-size: 14px; color: var(--caramel-dark); font-weight: 800; margin-top: 4px;">Level ${state.currentLevel + 1} reached!</div>
+            <div style="font-size: 13px; color: var(--caramel-dark); font-weight: 700; margin-top: 2px;">+${MILESTONE_REWARD.coins} 🪙 &nbsp; +${MILESTONE_REWARD.boosters}× each booster</div>
+          </div>`;
+      }
+
+      showModal({
+        title: 'Level Complete!',
+        sub: `Score: ${state.score.toLocaleString()}`,
+        stars: stars,
+        extra: extraHTML,
+        actions: [
+          { label: 'Map', cls: 'btn-secondary', onClick: goToMap },
+          { label: state.currentLevel + 1 < LEVELS.length ? 'Next →' : 'Done',
+            onClick: () => { if (state.currentLevel + 1 < LEVELS.length) startLevel(state.currentLevel + 1); else goToMap(); }}
+        ]
+      });
+    } else {
+      SFX.levelFail();
+      // Failing a level costs one life
+      spendLife();
+      let sub = 'Out of moves!';
+      const lvl = state.level;
+      if (lvl.type === 'score') sub = `Got ${state.score.toLocaleString()} of ${lvl.target.toLocaleString()}`;
+      else if (lvl.type === 'jelly') sub = `${state.jellyLeft} jelly remaining`;
+      showModal({
+        title: 'Try Again',
+        sub: sub,
+        stars: 0,
+        extra: `<div style="font-size:18px;margin:8px 0;">${livesDisplay()}</div>`,
+        actions: [
+          { label: 'Map', cls: 'btn-secondary', onClick: goToMap },
+          { label: 'Retry', onClick: () => {
+            if (!hasLives()) { hideModal(); showOutOfLivesModal(); return; }
+            startLevel(state.currentLevel);
+          }}
+        ]
+      });
+    }
+  }, 600);
+}
+
+function showModal({ title, sub, stars, actions, extra }) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-sub').textContent = sub;
+  document.getElementById('modal-stars').textContent = stars > 0 ? '⭐'.repeat(stars) + '☆'.repeat(3 - stars) : '';
+  const extraEl = document.getElementById('modal-extra');
+  if (extraEl) extraEl.innerHTML = extra || '';
+  const ae = document.getElementById('modal-actions');
+  ae.innerHTML = '';
+  actions.forEach(a => {
+    const b = document.createElement('button');
+    b.className = 'btn ' + (a.cls || '');
+    b.textContent = a.label;
+    b.onclick = a.onClick;
+    ae.appendChild(b);
+  });
+  document.getElementById('modal').classList.add('active');
+}
+function hideModal() { document.getElementById('modal').classList.remove('active'); }
+
+// AD MANAGER — disabled for CrazyGames (no external ads allowed)
+const AdManager = {
+  initialized: false,
+  init() { this.initialized = true; },
+};
+
+
+// =====================================================================
+// IAP MANAGER — drop-in shaped like Google Play Billing
+// =====================================================================
+// To swap to real Google Play Billing (after Capacitor + a billing plugin
+// such as @capacitor-community/in-app-purchases or RevenueCat):
+//   1. Replace IAPManager.purchase() body with the real billing call
+//   2. Configure matching product IDs in Google Play Console
+//   3. Call IAPManager.init() once on app load to fetch real prices
+//      and restore previously-owned non-consumable purchases
+// Everything else (shop UI, what each product grants) stays the same.
+//
+// Real Google Play version (commented for reference):
+//
+//   import 'cordova-plugin-purchase';  // or RevenueCat SDK
+//   const { store, ProductType, Platform } = CdvPurchase;
+//
+//   init() {
+//     store.register([
+//       { id: 'coins_small', type: ProductType.CONSUMABLE, platform: Platform.GOOGLE_PLAY },
+//       { id: 'remove_ads',  type: ProductType.NON_CONSUMABLE, platform: Platform.GOOGLE_PLAY },
+//       ... etc
+//     ]);
+//     store.when().approved(t => t.verify());
+//     store.when().verified(receipt => {
+//       receipt.finish();
+//       this._grantProduct(receipt.id);   // give coins / unlock remove-ads
+//     });
+//     store.initialize([Platform.GOOGLE_PLAY]);
+//   }
+//
+//   async purchase(productId) {
+//     const product = store.get(productId);
+//     await store.order(product.getOffer());
+//   }
+// =====================================================================
+
+// Product catalog. Prices here are display-only placeholders — real prices
+// come from Google Play Console (localized per country) once integrated.
+const IAP_PRODUCTS = [
+  {
+    id: 'coins_small', type: 'consumable',
+    title: 'Pocket of Coins', coins: 500, price: '$0.99',
+    icon: 'coin-small', badge: null,
+  },
+  {
+    id: 'coins_medium', type: 'consumable',
+    title: 'Bag of Coins', coins: 1500, price: '$1.99',
+    icon: 'coin-medium', badge: 'POPULAR',
+  },
+  {
+    id: 'coins_large', type: 'consumable',
+    title: 'Chest of Coins', coins: 5000, price: '$4.99',
+    icon: 'coin-large', badge: 'BEST VALUE',
+  },
+  {
+    id: 'coins_mega', type: 'consumable',
+    title: 'Vault of Coins', coins: 12000, price: '$9.99',
+    icon: 'coin-mega', badge: null,
+  },
+  {
+    id: 'remove_ads', type: 'non_consumable',
+    title: 'Remove Ads', coins: 0, price: '$4.99',
+    icon: 'no-ads', badge: null,
+    description: 'No more interstitial ads, ever. Rewarded ads stay optional.',
+  },
+  {
+    id: 'starter_pack', type: 'non_consumable',
+    title: 'Starter Pack', coins: 2000, price: '$0.99',
+    icon: 'starter', badge: 'LIMITED',
+    description: '2,000 coins + 3 of each booster. One time only!',
+    bonusBoosters: 3,
+  },
+];
+
+// ======================================================================
+// REMOVE-BEFORE-LAUNCH-IAP
+// The entire IAPManager below is a FAKE/PROTOTYPE purchase system.
+// Before launching: replace purchase() internals with real Google Play
+// Billing calls. See SHIPPING_GUIDE.md Phase 4, and the detailed comment
+// block already inside IAPManager.
+// ======================================================================
+const IAPManager = {
+  initialized: false,
+  ownedProducts: {},   // non-consumables the player owns: { remove_ads: true, ... }
+  _pendingPurchase: null,
+
+  async init() {
+    // In production: register products, fetch prices, restore purchases.
+    // For the prototype, load owned non-consumables from save data.
+    this.initialized = true;
+    try {
+      const raw = localStorage.getItem('smb_iap');
+      if (raw) this.ownedProducts = JSON.parse(raw) || {};
+    } catch (e) {
+      console.warn('[IAP] Failed to load owned products:', e);
+    }
+    console.log('[IAP] Initialized (prototype mode). Owned:', Object.keys(this.ownedProducts));
+  },
+
+  _saveOwned() {
+    try { localStorage.setItem('smb_iap', JSON.stringify(this.ownedProducts)); } catch (e) {}
+  },
+
+  isOwned(productId) {
+    return !!this.ownedProducts[productId];
+  },
+
+  hasRemoveAds() {
+    return this.isOwned('remove_ads');
+  },
+
+  /**
+   * Begin a purchase. In the prototype this shows a fake Google Play
+   * purchase sheet. In production, this calls the real billing API and
+   * the grant happens in the verified-purchase callback.
+   */
+  purchase(productId, onSuccess = () => {}, onCancel = () => {}) {
+    const product = IAP_PRODUCTS.find(p => p.id === productId);
+    if (!product) { onCancel(); return; }
+
+    // Non-consumables can only be bought once
+    if (product.type === 'non_consumable' && this.isOwned(productId)) {
+      showModal({
+        title: 'Already Owned',
+        sub: `You already own ${product.title}.`,
+        stars: 0, extra: '',
+        actions: [{ label: 'OK', onClick: () => { hideModal(); goToShop(); } }],
+      });
+      return;
+    }
+
+    this._pendingPurchase = { product, onSuccess, onCancel };
+    showFakePurchaseSheet(product);
+  },
+
+  // Called when the fake purchase sheet confirms (prototype only).
+  // In production this logic lives in the billing 'verified' callback.
+  _completePurchase() {
+    const pending = this._pendingPurchase;
+    this._pendingPurchase = null;
+    if (!pending) return;
+    const { product, onSuccess } = pending;
+    this._grantProduct(product.id);
+    onSuccess(product);
+  },
+
+  _cancelPurchase() {
+    const pending = this._pendingPurchase;
+    this._pendingPurchase = null;
+    if (pending) pending.onCancel();
+  },
+
+  // Apply the effects of a purchased product
+  _grantProduct(productId) {
+    const product = IAP_PRODUCTS.find(p => p.id === productId);
+    if (!product) return;
+    if (product.coins > 0) {
+      state.coins += product.coins;
+    }
+    if (product.bonusBoosters) {
+      state.ownedBoosters.hammer = (state.ownedBoosters.hammer || 0) + product.bonusBoosters;
+      state.ownedBoosters.swap = (state.ownedBoosters.swap || 0) + product.bonusBoosters;
+      state.ownedBoosters.bomb = (state.ownedBoosters.bomb || 0) + product.bonusBoosters;
+    }
+    if (product.type === 'non_consumable') {
+      this.ownedProducts[productId] = true;
+      this._saveOwned();
+    }
+    saveProgress();
+    console.log('[IAP] Granted:', productId);
+  },
+
+  /**
+   * Restore purchases — required by app stores. Re-grants non-consumables
+   * the player previously bought (e.g. after reinstall).
+   */
+  restorePurchases(onDone = () => {}) {
+    // In production: query the billing API for owned items.
+    // Prototype: we already loaded from localStorage in init().
+    const count = Object.keys(this.ownedProducts).length;
+    onDone(count);
+  },
+};
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ===== CONFETTI CELEBRATION =====
+function launchConfetti(amount = 60) {
+  const colors = ['#ee6a8e', '#ffce4a', '#95c9a3', '#6a7fc8', '#b884d4', '#ff8aab', '#f4b740'];
+  const shapes = ['circle', 'rect'];
+  const layer = document.createElement('div');
+  layer.className = 'confetti-layer';
+  document.getElementById('app').appendChild(layer);
+
+  for (let i = 0; i < amount; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const size = 6 + Math.random() * 8;
+    const isCircle = Math.random() > 0.5;
+
+    piece.style.cssText = `
+      background: ${color};
+      left: ${Math.random() * 100}%;
+      width: ${size}px;
+      height: ${isCircle ? size : size * 1.4}px;
+      border-radius: ${isCircle ? '50%' : '2px'};
+      animation: confettiFall ${2 + Math.random() * 2}s ${Math.random() * 0.8}s linear forwards;
+    `;
+    layer.appendChild(piece);
+  }
+  setTimeout(() => layer.remove(), 5500);
+}
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+}
+
+AdManager.init();
+IAPManager.init();
+loadProgress();
+SFX.loadPref();
+updateLives();  // catch up heart regeneration from time elapsed while closed
+renderHome();
+// Tutorial shows on first home visit after dismissing cover (handled in dismissCover)
+window.addEventListener('resize', () => {
+  if (document.getElementById('screen-game').classList.contains('active')) renderBoard();
+});
+</script>
+</body>
+</html>
